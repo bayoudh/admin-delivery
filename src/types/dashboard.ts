@@ -1,0 +1,73 @@
+export interface Restaurant {
+  id: string;
+  name: string;
+  address: string;
+  phone: string;
+  email: string;
+  rating: number;
+  totalOrders: number;
+  revenue: number;
+  status: 'active' | 'inactive' | 'pending';
+  createdAt: Date;
+  cuisine: string;
+  deliveryTime: number;
+}
+
+export interface Delivery {
+  id: string;
+  orderId: string;
+  restaurantId: string;
+  customerId: string;
+  driverId: string;
+  status: 'preparing' | 'picked_up' | 'in_transit' | 'delivered' | 'cancelled';
+  estimatedTime: number;
+  actualTime?: number;
+  distance: number;
+  fee: number;
+  createdAt: Date;
+  deliveredAt?: Date;
+}
+
+export interface Customer {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  totalOrders: number;
+  totalSpent: number;
+  averageOrderValue: number;
+  lastOrderDate: Date;
+  status: 'active' | 'inactive';
+  joinedAt: Date;
+}
+
+export interface RevenueStats {
+  totalRevenue: number;
+  todayRevenue: number;
+  monthlyRevenue: number;
+  yearlyRevenue: number;
+  revenueGrowth: number;
+  orderCount: number;
+  averageOrderValue: number;
+}
+
+export interface DashboardStats {
+  restaurants: {
+    total: number;
+    active: number;
+    topPerforming: Restaurant[];
+  };
+  deliveries: {
+    total: number;
+    inProgress: number;
+    completed: number;
+    averageTime: number;
+  };
+  customers: {
+    total: number;
+    active: number;
+    newThisMonth: number;
+  };
+  revenue: RevenueStats;
+}
