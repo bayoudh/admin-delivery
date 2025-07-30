@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { mockRestaurants } from '../utils/mockData';
-import { Restaurant } from '../types/dashboard';
-import { Search, Filter, Plus, Edit, Trash2, Star, Clock, Phone, Mail } from 'lucide-react';
+import { mockRestaurants } from '@/utils/mockData';
+import { Restaurant } from '@/types/dashboard';
+import { Search, Filter, Plus, Edit, Trash2, Star, Clock, Phone, Mail, X } from 'lucide-react';
+import AddRestaurantPage from './AddRestaurant';
 
 export const RestaurantManagement: React.FC = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>(mockRestaurants);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive' | 'pending'>('all');
-
+  const [isAddOpen, setIsAddOpen] = useState(false)
   const filteredRestaurants = restaurants.filter(restaurant => {
     const matchesSearch = restaurant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          restaurant.cuisine.toLowerCase().includes(searchTerm.toLowerCase());
@@ -31,11 +32,25 @@ export const RestaurantManagement: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Restaurant Management</h1>
           <p className="text-gray-600">Manage all registered restaurants and their performance.</p>
         </div>
-        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center font-medium transition-colors">
+        <button type="button" onClick={() => setIsAddOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center font-medium transition-colors">
           <Plus className="w-4 h-4 mr-2" />
           Add Restaurant
         </button>
       </div>
+ {/* Modal for AddRestaurantPage */}
+      {isAddOpen && (
+        <div className="fixed inset-0 z-30 bg-gray-600/50 flex justify-center items-center">
+          <div className="relative bg-white rounded-xl shadow-lg p-6 max-w-2xl w-full">
+            <button
+              onClick={() => setIsAddOpen(false)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-red-500"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <AddRestaurantPage />
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">

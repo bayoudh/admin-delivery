@@ -1,48 +1,35 @@
-"use client"
-import { Analytics } from '@/components/Analytics';
-import { CustomerManagement } from '@/components/CustomerManagement';
-import { Dashboard } from '@/components/Dashboard';
-import { DeliveryManagement } from '@/components/DeliveryManagement';
-import { RestaurantManagement } from '@/components/RestaurantManagement';
-import { Sidebar } from '@/components/Sidebar';
-import React, { useState } from 'react';
+import React from 'react'
+
+import loginImg from '@/assets/login.png'
+import Image from 'next/image'
 
 
-function App() {
-  const [activeSection, setActiveSection] = useState('dashboard');
-
-  const renderContent = () => {
-    switch (activeSection) {
-      case 'dashboard':
-        return <Dashboard />;
-      case 'restaurants':
-        return <RestaurantManagement />;
-      case 'deliveries':
-        return <DeliveryManagement />;
-      case 'customers':
-        return <CustomerManagement />;
-      case 'analytics':
-        return <Analytics />;
-      case 'settings':
-        return (
-          <div className="p-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
-            <p className="text-gray-600">System settings and configuration options coming soon...</p>
-          </div>
-        );
-      default:
-        return <Dashboard />;
-    }
-  };
-
+export default function Login() {
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <Sidebar activeSection={activeSection} onSectionChange={setActiveSection} />
-      <div className="flex-1 ml-64">
-        {renderContent()}
-      </div>
-    </div>
-  );
-}
+    <div className='grid grid-cols-1 sm:grid-cols-2 h-screen w-full bg-sky-100 max-sm:h-max'>
+        <div className=' flex flex-col justify-center items-center '>
+           <Image className=' object-cover' src={loginImg} alt="" />
+          
+        </div>
 
-export default App;
+        <div className=' flex flex-col justify-center'>
+            <form className='max-w-[400px] w-full mx-auto rounded-lg  p-8 px-8'>
+                <h2 className='text-4xl dark:text-white font-bold text-center text-blue-400'>SIGN IN</h2>
+                <div className='flex flex-col text-blue-400 py-2'>
+                    <label>Username</label>
+                    <input className='rounded-lg bg-white  mt-2 p-2 focus:border-sky-400 focus:bg-amber-50 focus:outline-none border-2' type="text" />
+                </div>
+                <div className='flex flex-col text-blue-400 py-2'>
+                    <label>Password</label>
+                    <input className='p-2 rounded-lg bg-white mt-2 focus:border-blue-500 focus:bg-amber-50 focus:outline-none' type="password" />
+                </div>
+                <div className='flex justify-between text-blue-400 py-2'>
+                    <p className='flex items-center'><input className='mr-2' type="checkbox" /> Remember Me</p>
+                </div>
+                <button className='w-full my-5 py-2 bg-sky-500 shadow-lg shadow-teal-500/50 hover:shadow-sky-500/40 text-white font-semibold rounded-lg'>SIGNIN</button>
+                
+            </form>
+        </div>
+    </div>
+  )
+}

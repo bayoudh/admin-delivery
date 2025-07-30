@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { mockDeliveries } from '../utils/mockData';
-import { Delivery } from '../types/dashboard';
+import { mockDeliveries } from '@/utils/mockData';
+import { Delivery } from '@/types/dashboard';
 import { Search, Filter, Clock, MapPin, Package, Truck } from 'lucide-react';
 
 export const DeliveryManagement: React.FC = () => {
