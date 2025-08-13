@@ -1,16 +1,9 @@
+import { LucideIcon } from "lucide-react";
 export interface Restaurant {
   id: string;
-  name: string;
-  address: string;
-  phone: string;
-  email: string;
-  rating: number;
-  totalOrders: number;
-  revenue: number;
-  status: 'active' | 'inactive' | 'pending';
-  createdAt: Date;
-  cuisine: string;
-  deliveryTime: number;
+  nom: string;
+  adresse: string;
+ 
 }
 
 export interface Delivery {
@@ -70,4 +63,10 @@ export interface DashboardStats {
     newThisMonth: number;
   };
   revenue: RevenueStats;
+}
+export interface MenuItem {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  url:string;
 }

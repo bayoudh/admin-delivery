@@ -1,10 +1,10 @@
 import React from 'react';
 import { StatCard } from './StatCard';
-import { mockDashboardStats } from '../utils/mockData';
+//import { mockDashboardStats } from '../utils/mockData';
 import { DollarSign, Store, Truck, Users, TrendingUp, Clock, ShoppingBag, Star } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
-  const stats = mockDashboardStats;
+  //const stats = mockDashboardStats;
 
   return (
     <div className="p-6">
@@ -14,7 +14,7 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* Revenue Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+  {/*     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard
           title="Total Revenue"
           value={`$${stats.revenue.totalRevenue.toLocaleString()}`}
@@ -45,9 +45,9 @@ export const Dashboard: React.FC = () => {
           color="amber"
         />
       </div>
-
+ */}
       {/* Business Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+     {/*  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <StatCard
           title="Active Restaurants"
           value={`${stats.restaurants.active}/${stats.restaurants.total}`}
@@ -69,10 +69,10 @@ export const Dashboard: React.FC = () => {
           icon={Users}
           color="purple"
         />
-      </div>
+      </div> */}
 
       {/* Top Performing Restaurants */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+  {/*     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-gray-900">Top Performing Restaurants</h2>
           <button className="text-blue-600 hover:text-blue-700 font-medium text-sm">View All</button>
@@ -107,7 +107,7 @@ export const Dashboard: React.FC = () => {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
