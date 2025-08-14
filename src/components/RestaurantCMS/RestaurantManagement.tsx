@@ -15,8 +15,7 @@ import {
 } from "lucide-react";
 import AddRestaurantPage from "./AddRestaurant";
 import { Restaurant } from "@/types/dashboard";
-
-
+import Loading from "../reaction/Loading";
 
 export default function RestaurantManagement() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -55,11 +54,11 @@ export default function RestaurantManagement() {
 
     fetchRestaurants();
   }, []);
-const filteredRestaurants = restaurants.filter((restaurant) => {
-  const name = restaurant.nom ; // fallback to empty string
-  const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase());
-  return matchesSearch;
-});
+  const filteredRestaurants = restaurants.filter((restaurant) => {
+    const name = restaurant.nom; // fallback to empty string
+    const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesSearch;
+  });
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
@@ -219,7 +218,10 @@ const filteredRestaurants = restaurants.filter((restaurant) => {
         ))}
       </div>
 
-      {loading && <p className="mt-4 text-gray-500">Loading...</p>}
+      {loading && (
+          <Loading/>
+      )}
+
       {error && <p className="mt-4 text-red-500">{error}</p>}
     </div>
   );

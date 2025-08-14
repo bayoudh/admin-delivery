@@ -16,7 +16,7 @@ const menuItems:MenuItem[]  = [
 export const Sidebar: React.FC = () => {
    const router = useRouter();
     const pathname = usePathname();
-  const [activeSection, setActiveSection] = useState("dashboard");
+  const [activeSection, setActiveSection] = useState('');
    // Sync activeSection with current route on mount and route change
  useEffect(() => {
     const currentItem = menuItems.find(item => item.url === pathname);
