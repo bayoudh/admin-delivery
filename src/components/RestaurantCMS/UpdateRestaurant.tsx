@@ -1,23 +1,42 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
-type AddRestaurantPageProps = {
+type Restaurant = {
+  id: string;
+  nom: string;
+  adresse: string;
+};
+
+type UpdateRestaurantPageProps = {
   fetchRestaurants: () => void;
   setIsAddOpen: (open: boolean) => void;
+  restaurantToEdit?: Restaurant; // optional for update
 };
-export default function AddRestaurantPage({
+
+export default function UpdateRestaurantPage({
   fetchRestaurants,
   setIsAddOpen,
-}: AddRestaurantPageProps) {
+  restaurantToEdit,
+}: UpdateRestaurantPageProps) {
   const router = useRouter();
 
   const [form, setForm] = useState({
-    nom: "", // maps to "name"
-    adresse: "", // maps to "cuisine" or address
+    nom: "",
+    adresse: "",
   });
+
+  // Pre-fill form if editing
+  useEffect(() => {
+    if (restaurantToEdit) {
+      setForm({
+        nom: restaurantToEdit.nom,
+        adresse: restaurantToEdit.adresse,
+      });
+    }
+  }, [restaurantToEdit]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -27,29 +46,37 @@ export default function AddRestaurantPage({
     e.preventDefault();
 
     try {
-      const res = await fetch("/api/restaurants", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
-      });
+      const res = await fetch(
+        restaurantToEdit ? `/api/restaurants/${restaurantToEdit.id}` : "/api/restaurants",
+        {
+          method: restaurantToEdit ? "PUT" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(form),
+        }
+      );
 
       if (!res.ok) {
         throw new Error(`Error ${res.status}`);
       }
-      toast.success("Restaurant added successfully!");
+
+      toast.success(
+        restaurantToEdit ? "Restaurant updated successfully!" : "Restaurant added successfully!"
+      );
       fetchRestaurants();
       setIsAddOpen(false);
     } catch (error) {
-      console.error("Error adding restaurant:", error);
-      toast.error("Failed to add restaurant.");
+      console.error("Error saving restaurant:", error);
+      toast.error(restaurantToEdit ? "Failed to update restaurant." : "Failed to add restaurant.");
     }
   };
 
   return (
     <div className="p-6 max-w-2xl mx-auto bg-white rounded-lg flex flex-col items-center justify-center">
-      <h1 className="text-2xl font-bold mb-4">Add New Restaurant</h1>
+      <h1 className="text-2xl font-bold mb-4">
+        {restaurantToEdit ? "Update Restaurant" : "Add New Restaurant"}
+      </h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700">
@@ -82,7 +109,7 @@ export default function AddRestaurantPage({
             type="submit"
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 w-full py-4 rounded-lg font-medium transition-colors"
           >
-            ADD
+            {restaurantToEdit ? "UPDATE" : "ADD"}
           </button>
         </div>
       </form>

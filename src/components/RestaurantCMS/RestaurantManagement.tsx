@@ -26,32 +26,30 @@ export default function RestaurantManagement() {
     "all" | "active" | "inactive" | "pending"
   >("all");
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const fetchRestaurants = async () => {
+    try {
+      setLoading(true);
 
-  useEffect(() => {
-    const fetchRestaurants = async () => {
-      try {
-        setLoading(true);
+      const res = await fetch("/api/restaurants", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
 
-        const res = await fetch("/api/restaurants", {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
-
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-
-        const data: Restaurant[] = await res.json();
-        console.log("Restaurants:", data);
-        setRestaurants(data);
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load restaurants");
-      } finally {
-        setLoading(false);
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
       }
-    };
 
+      const data: Restaurant[] = await res.json();
+      console.log("Restaurants:", data);
+      setRestaurants(data);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load restaurants");
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
     fetchRestaurants();
   }, []);
   const filteredRestaurants = restaurants.filter((restaurant) => {
@@ -104,7 +102,7 @@ export default function RestaurantManagement() {
             >
               <X className="w-5 h-5" />
             </button>
-            <AddRestaurantPage />
+            <AddRestaurantPage fetchRestaurants={fetchRestaurants} setIsAddOpen={setIsAddOpen}/>
           </div>
         </div>
       )}
@@ -218,9 +216,7 @@ export default function RestaurantManagement() {
         ))}
       </div>
 
-      {loading && (
-          <Loading/>
-      )}
+      {loading && <Loading />}
 
       {error && <p className="mt-4 text-red-500">{error}</p>}
     </div>
