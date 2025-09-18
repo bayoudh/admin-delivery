@@ -3,34 +3,24 @@ import React, { useState } from "react";
 import loginImg from "@/assets/login.png";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-
+import { useAuthStore } from "@/lib/store/auth";
+import { User } from "lucide-react";
 export default function Login() {
+  const { user, login, logout } = useAuthStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
   const signin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch(`/api/admin/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      console.log(res)
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
-      const data = await res.json();
-
-      // Save token & user in localStorage
-      if (data.token) localStorage.setItem("token", data.token);
-      if (data.user) localStorage.setItem("user", JSON.stringify(data.user));
-
-      console.log("Login success:", data);
-
+      await login(email, password); // 👈 await the async login
+      console.log(User)
       router.push("/dashboard");
     } catch (err) {
       console.error(err);
@@ -39,6 +29,7 @@ export default function Login() {
       setLoading(false);
     }
   };
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 h-screen w-full bg-sky-100 max-sm:h-max">
       <div className=" flex flex-col justify-center items-center ">
