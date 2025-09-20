@@ -1,11 +1,10 @@
-// lib/store/auth.ts
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, StorageValue } from "zustand/middleware";
 
 interface User {
   id: string;
-  firstname:string;
-  lastname:string;
+  firstname: string;
+  lastname: string;
   email: string;
   role?: string;
 }
@@ -13,10 +12,25 @@ interface User {
 interface AuthState {
   user: User | null;
   token: string | null;
-  login: (username: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
+/* // Create a typed sessionStorage adapter
+const sessionStorageAdapter = {
+  getItem: (name: string): StorageValue<AuthState> | null => {
+    const str = sessionStorage.getItem(name);
+    if (!str) return null;
+    return JSON.parse(str) as StorageValue<AuthState>;
+  },
+  setItem: (name: string, value: StorageValue<AuthState>): void => {
+    sessionStorage.setItem(name, JSON.stringify(value));
+  },
+  removeItem: (name: string): void => {
+    sessionStorage.removeItem(name);
+  },
+};
+ */
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
@@ -24,7 +38,6 @@ export const useAuthStore = create<AuthState>()(
       token: null,
 
       login: async (email, password) => {
-        
         const res = await fetch(`/api/admin/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -33,13 +46,12 @@ export const useAuthStore = create<AuthState>()(
 
         if (!res.ok) throw new Error("Login failed");
         const data = await res.json();
-        console.log(data)
-        // Adjust based on your API response
+
         set({
           user: {
             id: data.user.id,
-            firstname:data.user.firstname,
-            lastname:data.user.lastname,
+            firstname: data.user.firstname,
+            lastname: data.user.lastname,
             email: data.user.email,
             role: data.user.role,
           },
@@ -50,7 +62,8 @@ export const useAuthStore = create<AuthState>()(
       logout: () => set({ user: null, token: null }),
     }),
     {
-      name: "auth-storage", // key in localStorage
+      name: "auth-storage",
+      /* storage: sessionStorageAdapter, */
     }
   )
 );

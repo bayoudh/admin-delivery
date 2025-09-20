@@ -15,7 +15,7 @@ const NotFoundPage = () => {
         The page you are looking for does not exist or has been moved.
       </p>
       <button
-        onClick={() => router.back()}
+        onClick={() => router.push('/')}
         className="mt-6 px-6 py-2 text-white bg-blue-600 rounded hover:bg-blue-700"
       >
         Go Back Home

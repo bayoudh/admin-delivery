@@ -1,4 +1,11 @@
 import { LucideIcon } from "lucide-react";
+export interface User {
+  id: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  role: "customer" | "restaurant" | "driver";
+}
 export interface Restaurant {
   id: string;
   nom: string;
