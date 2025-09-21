@@ -10,12 +10,14 @@ import {
   Truck,
   UserPen,
   Users,
+  CheckLine
 } from "lucide-react";
 import { MenuItem } from "../types/dashboard";
 import { usePathname, useRouter } from "next/navigation";
 const menuItems: MenuItem[] = [
   { id: "dashboard", label: "Dashboard", icon: Home, url: "/dashboard" },
-  { id: "Users", label: "Users", icon: Home, url: "/users" },
+  { id: "Users", label: "Users", icon: Users, url: "/users" },
+  { id: "Catogory Store", label: "Catogory Store", icon: CheckLine, url: "/catogory-store" },
   { id: "restaurants", label: "Restaurants", icon: Store, url: "/restaurant" },
   { id: "deliveries", label: "Deliveries", icon: Truck, url: "/deliveries" },
   {
