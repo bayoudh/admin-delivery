@@ -6,6 +6,11 @@ export interface User {
   email: string;
   role: "customer" | "restaurant" | "driver";
 }
+export interface Category {
+  id: string;
+  name: string;
+  }
+  
 export interface Restaurant {
   id: string;
   nom: string;
