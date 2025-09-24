@@ -148,7 +148,7 @@ const handleUpdate=(id:string)=>{
                   key={categoryItem.id}
                   className="hover:bg-gray-50 transition-colors text-xl"
                 >
-                  <td className="p-3 border-b">{categoryItem.name}</td>
+                  <td className="p-3 border-b uppercase">{categoryItem.name}</td>
 
                   <td className="p-3 border-b text-center space-x-2">
                     <button
