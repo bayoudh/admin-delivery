@@ -5,6 +5,9 @@ import React, { useEffect, useState } from "react";
 import { Trash2, Edit3 } from "lucide-react";
 import { Category } from "@/types/dashboard";
 import AddCategoryForm from "@/components/Category/addCategory";
+import UpdateCategoryForm from "@/components/Category/updateCategory";
+import Loading from "@/components/reaction/Loading";
+import DeletePopup from "@/components/reaction/DeletePopup";
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -15,6 +18,9 @@ export default function CategoriesPage() {
   const [entries, setEntries] = useState(10);
   const [page, setPage] = useState(1);
   const [openAdd, setOpenAdd] = useState(false);
+  const [openUpdate, setOpenUpdate] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
+  const [selectCategory,setSelectCategory]=useState("");
 
   const fetchCategory = async () => {
     try {
@@ -43,9 +49,16 @@ export default function CategoriesPage() {
     fetchCategory();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
+const handleUpdate=(id:string)=>{
+  setSelectCategory(id);
+  setOpenUpdate(true)
+}
+  const onDelete=(id:string)=>{
+     setSelectCategory(id);
+    setOpenDelete(true)
+  }
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this category?")) return;
+   
 
     try {
       const res = await fetch(`/api/admin/categorystore/${id}`, {
@@ -57,6 +70,7 @@ export default function CategoriesPage() {
       });
       if (!res.ok) throw new Error("Failed to delete category");
       setCategories(categories.filter((c) => c.id !== id));
+      setOpenDelete(false)
     } catch (err: any) {
       alert(err.message);
     }
@@ -74,12 +88,8 @@ export default function CategoriesPage() {
 
   if (loading) {
     return (
-      <div className="absolute inset-0 flex justify-center items-center bg-white/50 z-50">
-        <div className="flex items-center space-x-2">
-          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-          <span className="text-gray-600 text-2xl">Loading Categories...</span>
-        </div>
-      </div>
+     
+      <Loading name={"Categories"}/>
     );
   }
   if (error) return <p className="text-red-500">Error: {error}</p>;
@@ -143,13 +153,13 @@ export default function CategoriesPage() {
                   <td className="p-3 border-b text-center space-x-2">
                     <button
                       className="text-blue-600 hover:text-blue-800"
-                      onClick={() => alert(`Edit ${categoryItem.id}`)}
+                      onClick={() => handleUpdate(categoryItem.id)}
                     >
                       <Edit3 size={18} />
                     </button>
                     <button
                       className="text-red-600 hover:text-red-800"
-                      onClick={() => handleDelete(categoryItem.id)}
+                      onClick={() => onDelete(categoryItem.id)}
                     >
                       <Trash2 size={18} />
                     </button>
@@ -219,7 +229,11 @@ export default function CategoriesPage() {
       </div>
 
       {/* Add Category Modal */}
-      {openAdd && <AddCategoryForm onClose={() => setOpenAdd(false)} />}
+      {openAdd && <AddCategoryForm onClose={() => setOpenAdd(false)} token={token}  fetchCategory={fetchCategory}/>}
+      {openUpdate && <UpdateCategoryForm onClose={() => setOpenUpdate(false)} token={token}  fetchCategory={fetchCategory} id={selectCategory} />}
+      {openDelete && (
+        <DeletePopup onConfirm={handleDelete} onCancel={() => setOpenDelete(false)} id={selectCategory}/>
+      )}
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useAuthStore } from "@/lib/store/auth";
 import React, { useEffect, useState } from "react";
 import { Trash2, Edit3 } from "lucide-react";
 import { User } from "@/types/dashboard";
+import Loading from "@/components/reaction/Loading";
 
 
 export default function UsersPage() {
@@ -70,12 +71,7 @@ export default function UsersPage() {
 
   if (loading) {
     return (
-      <div className="absolute inset-0 flex justify-center items-center bg-white/50 z-50">
-        <div className="flex items-center space-x-2">
-          <div className="w-15 h-15 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-          <span className="text-gray-600 text-2xl  ">Loading users...</span>
-        </div>
-      </div>
+      <Loading name={"users"}/>
     );
   }
   if (error) return <p className="text-red-500">Error: {error}</p>;

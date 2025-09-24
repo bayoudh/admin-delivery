@@ -1,15 +1,44 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { Category } from "@/types/dashboard"; // make sure this path is correct
 
-interface AddCategoryFormProps {
+interface UpdateCategoryFormProps {
   onClose: () => void;
   token: string | null;
   fetchCategory: () => void;
+  id: string;
 }
 
-export default function AddCategoryForm({ onClose, token, fetchCategory }: AddCategoryFormProps) {
+export default function UpdateCategoryForm({ onClose, token, fetchCategory, id }: UpdateCategoryFormProps) {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Fetch current category data
+  const getCategory = async () => {
+    try {
+      if (!token) throw new Error("No auth token found");
+
+      const res = await fetch(`/api/admin/categorystore/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Failed to fetch category");
+
+      const data: Category = await res.json();
+      setName(data.name); // populate input with current name
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  useEffect(() => {
+    getCategory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, token]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,8 +55,8 @@ export default function AddCategoryForm({ onClose, token, fetchCategory }: AddCa
 
     try {
       setLoading(true);
-      const res = await fetch("/api/admin/categorystore", {
-        method: "POST",
+      const res = await fetch(`/api/admin/categorystore/${id}`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -37,13 +66,12 @@ export default function AddCategoryForm({ onClose, token, fetchCategory }: AddCa
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data?.message || "Failed to add category");
+        setError(data?.message || "Failed to update category");
         return;
       }
 
       // Success → refresh categories and close modal
       fetchCategory();
-      setName("");
       onClose();
     } catch (err: any) {
       setError(err.message || "Something went wrong");
@@ -59,7 +87,7 @@ export default function AddCategoryForm({ onClose, token, fetchCategory }: AddCa
         className="flex flex-col space-y-3 p-6 border rounded-lg bg-white shadow-lg w-80"
       >
         <label className="font-semibold text-gray-700 text-lg">
-          Add Category Store
+          Update Category Store
         </label>
 
         <input
@@ -86,7 +114,7 @@ export default function AddCategoryForm({ onClose, token, fetchCategory }: AddCa
             className="px-6 py-2 rounded-lg border bg-blue-500 text-white hover:bg-blue-600 focus:ring-2 focus:ring-blue-500"
             disabled={loading}
           >
-            {loading ? "Adding..." : "Add"}
+            {loading ? "Updating..." : "Update"}
           </button>
         </div>
       </form>
