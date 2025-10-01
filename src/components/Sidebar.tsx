@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, {useState } from "react";
 import { useAuthStore } from "../lib/store/auth";
 import {
   BarChart3,
@@ -33,15 +33,10 @@ const menuItems: MenuItem[] = [
 
 export const Sidebar: React.FC = () => {
   const router = useRouter();
-  const pathname = usePathname();
+
   const [activeSection, setActiveSection] = useState("");
-  // Sync activeSection with current route on mount and route change
-  useEffect(() => {
-    const currentItem = menuItems.find((item) => item.url === pathname);
-    if (currentItem) {
-      setActiveSection(currentItem.id);
-    }
-  }, [pathname]);
+
+
   function gonav(item: MenuItem) {
     setActiveSection(item.id);
     router.push(`${item.url}`);

@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { Trash2, Edit3 } from "lucide-react";
 import { User } from "@/types/dashboard";
 import Loading from "@/components/reaction/Loading";
+import Pagination from "@/components/reaction/Pagination";
 
 
 export default function UsersPage() {
@@ -172,48 +173,8 @@ export default function UsersPage() {
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-between items-center mt-4 text-lg">
-        <span>
-          Showing {(page - 1) * entries + 1} to{" "}
-          {Math.min(page * entries, filteredUsers.length)} of{" "}
-          {filteredUsers.length} entries
-        </span>
-        <div className="flex space-x-2">
-          <button
-            disabled={page === 1}
-            onClick={() => setPage((p) => p - 1)}
-            className={`px-3 py-1 rounded-lg border ${
-              page === 1
-                ? "text-gray-400 cursor-not-allowed"
-                : "hover:bg-gray-100"
-            }`}
-          >
-            Previous
-          </button>
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button
-              key={i}
-              onClick={() => setPage(i + 1)}
-              className={`px-3 py-1 rounded-lg border ${
-                page === i + 1 ? "bg-blue-600 text-white" : "hover:bg-gray-100"
-              }`}
-            >
-              {i + 1}
-            </button>
-          ))}
-          <button
-            disabled={page === totalPages}
-            onClick={() => setPage((p) => p + 1)}
-            className={`px-3 py-1 rounded-lg border ${
-              page === totalPages
-                ? "text-gray-400 cursor-not-allowed"
-                : "hover:bg-gray-100"
-            }`}
-          >
-            Next
-          </button>
-        </div>
-      </div>
+     
+             <Pagination page={page} entries={entries} filtered={filteredUsers} setPage ={setPage} totalPages={totalPages}/>
     </div>
   );
 }

@@ -8,6 +8,7 @@ import AddCategoryForm from "@/components/Category/addCategory";
 import UpdateCategoryForm from "@/components/Category/updateCategory";
 import Loading from "@/components/reaction/Loading";
 import DeletePopup from "@/components/reaction/DeletePopup";
+import Pagination from "@/components/reaction/Pagination";
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -182,50 +183,8 @@ const handleUpdate=(id:string)=>{
         </div>
 
         {/* Pagination */}
-        <div className="flex justify-between items-center mt-4 text-lg">
-          <span>
-            Showing {(page - 1) * entries + 1} to{" "}
-            {Math.min(page * entries, filteredCategories.length)} of{" "}
-            {filteredCategories.length} entries
-          </span>
-          <div className="flex space-x-2">
-            <button
-              disabled={page === 1}
-              onClick={() => setPage((p) => p - 1)}
-              className={`px-3 py-1 rounded-lg border ${
-                page === 1
-                  ? "text-gray-400 cursor-not-allowed"
-                  : "hover:bg-gray-100"
-              }`}
-            >
-              Previous
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i}
-                onClick={() => setPage(i + 1)}
-                className={`px-3 py-1 rounded-lg border ${
-                  page === i + 1
-                    ? "bg-blue-600 text-white"
-                    : "hover:bg-gray-100"
-                }`}
-              >
-                {i + 1}
-              </button>
-            ))}
-            <button
-              disabled={page === totalPages}
-              onClick={() => setPage((p) => p + 1)}
-              className={`px-3 py-1 rounded-lg border ${
-                page === totalPages
-                  ? "text-gray-400 cursor-not-allowed"
-                  : "hover:bg-gray-100"
-              }`}
-            >
-              Next
-            </button>
-          </div>
-        </div>
+        
+        <Pagination page={page} entries={entries} filtered={filteredCategories} setPage ={setPage} totalPages={totalPages}/>
       </div>
 
       {/* Add Category Modal */}
