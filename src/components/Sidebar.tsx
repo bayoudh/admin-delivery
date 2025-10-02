@@ -13,7 +13,7 @@ import {
   CheckLine
 } from "lucide-react";
 import { MenuItem } from "../types/dashboard";
-import { usePathname, useRouter } from "next/navigation";
+import {  useRouter } from "next/navigation";
 const menuItems: MenuItem[] = [
   { id: "dashboard", label: "Dashboard", icon: Home, url: "/dashboard" },
   { id: "Users", label: "Users", icon: Users, url: "/users" },
