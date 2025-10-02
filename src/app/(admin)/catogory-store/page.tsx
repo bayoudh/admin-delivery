@@ -2,7 +2,7 @@
 
 import { useAuthStore } from "@/lib/store/auth";
 import React, { useEffect, useState } from "react";
-import { Trash2, Edit3 } from "lucide-react";
+import { Trash2, Edit3, Plus } from "lucide-react";
 import { Category } from "@/types/dashboard";
 import AddCategoryForm from "@/components/Category/addCategory";
 import UpdateCategoryForm from "@/components/Category/updateCategory";
@@ -118,19 +118,20 @@ const handleUpdate=(id:string)=>{
             </select>
             <span className="text-xl">Entries</span>
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center ">
             <input
               type="text"
               placeholder="Search..."
-              className="border rounded-lg px-8 py-2 text-xl focus:outline-none focus:ring focus:ring-blue-200"
+              className="border rounded-lg px-8 py-2 mr-1 text-xl focus:outline-none focus:ring focus:ring-blue-200"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
             <button
               onClick={() => setOpenAdd(true)}
-              className="px-6 py-2 ml-1 rounded-lg border hover:bg-gray-50 focus:ring-2 focus:ring-blue-500"
+              className=" rounded-lg  bg-blue-600 hover:bg-blue-700 text-white text-xl px-8 py-2 flex items-center justify-center font-medium transition-colors"
             >
-              +
+              <Plus className="w-8 h-8 mr-2" />
+             
             </button>
           </div>
         </div>

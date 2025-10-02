@@ -2,11 +2,10 @@
 
 import { useAuthStore } from "@/lib/store/auth";
 import React, { useEffect, useState } from "react";
-import { Trash2, Edit3 } from "lucide-react";
+import { Trash2, Edit3, Plus } from "lucide-react";
 import { User } from "@/types/dashboard";
 import Loading from "@/components/reaction/Loading";
 import Pagination from "@/components/reaction/Pagination";
-
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -71,9 +70,7 @@ export default function UsersPage() {
   const displayed = filteredUsers.slice((page - 1) * entries, page * entries);
 
   if (loading) {
-    return (
-      <Loading name={"users"}/>
-    );
+    return <Loading name={"users"} />;
   }
   if (error) return <p className="text-red-500">Error: {error}</p>;
 
@@ -99,13 +96,22 @@ export default function UsersPage() {
           </select>
           <span className="text-xl">Entries</span>
         </div>
+        <div className="flex items-center ">
         <input
           type="text"
           placeholder="Search..."
-          className="border rounded-lg px-8 py-2 text-xl focus:outline-none focus:ring focus:ring-blue-200"
+          className="border rounded-lg px-8 py-2 mr-1 text-xl focus:outline-none focus:ring focus:ring-blue-200"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+        
+          <button
+            onClick={() => <h1>aa</h1>}
+            className=" rounded-lg  bg-blue-600 hover:bg-blue-700 text-white text-xl px-8 py-2 flex items-center justify-center font-medium transition-colors"
+          >
+            <Plus className="w-8 h-8 mr-2" />
+          </button>
+        </div>
       </div>
 
       <div className="overflow-x-auto">
@@ -173,8 +179,14 @@ export default function UsersPage() {
       </div>
 
       {/* Pagination */}
-     
-             <Pagination page={page} entries={entries} filtered={filteredUsers} setPage ={setPage} totalPages={totalPages}/>
+
+      <Pagination
+        page={page}
+        entries={entries}
+        filtered={filteredUsers}
+        setPage={setPage}
+        totalPages={totalPages}
+      />
     </div>
   );
 }
