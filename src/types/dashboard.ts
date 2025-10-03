@@ -13,8 +13,15 @@ export interface Category {
   
 export interface Restaurant {
   id: string;
-  nom: string;
-  adresse: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  street?: string;
+  city?: string;
+  zipcode?: string;
+  status: "active" | "closed";
+  restaurant_photo?: string;
+  created_at: Date;
  
 }
 

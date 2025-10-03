@@ -18,7 +18,7 @@ const menuItems: MenuItem[] = [
   { id: "dashboard", label: "Dashboard", icon: Home, url: "/dashboard" },
   { id: "Users", label: "Users", icon: Users, url: "/users" },
   { id: "Catogory Store", label: "Catogory Store", icon: CheckLine, url: "/catogory-store" },
-  { id: "restaurants", label: "Restaurants", icon: Store, url: "/restaurant" },
+  { id: "Store", label: "Store", icon: Store, url: "/store" },
   { id: "deliveries", label: "Deliveries", icon: Truck, url: "/deliveries" },
   {
     id: "delivery-person",
@@ -55,7 +55,7 @@ export const Sidebar: React.FC = () => {
   return (
     <div className="w-64 bg-white shadow-lg h-screen fixed left-0 top-0">
       <div className="p-6 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-gray-800">RestaurantHub</h1>
+        <h1 className="text-2xl font-bold text-gray-800">DeliveryHub</h1>
         <p className="text-sm text-gray-600 mt-1">Admin Dashboard</p>
       </div>
 

@@ -1,4 +1,4 @@
-import RestaurantManagement  from '@/components/RestaurantCMS/RestaurantManagement'
+import RestaurantManagement  from '@/components/StoreCMS/StoreManagement'
 import type { Metadata } from 'next'
 
 

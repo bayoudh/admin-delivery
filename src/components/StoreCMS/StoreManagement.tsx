@@ -13,14 +13,16 @@ import {
   Mail,
   X,
 } from "lucide-react";
-import AddRestaurantPage from "./AddRestaurant";
+import AddRestaurantPage from "./Addstore";
 import { Restaurant } from "@/types/dashboard";
 import Loading from "../reaction/Loading";
+import { useAuthStore } from "@/lib/store/auth";
 
 export default function RestaurantManagement() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { token } = useAuthStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<
     "all" | "active" | "inactive" | "pending"
@@ -30,9 +32,12 @@ export default function RestaurantManagement() {
     try {
       setLoading(true);
 
-      const res = await fetch("/api/restaurants", {
+      const res = await fetch("api/admin/restaurant", {
         method: "GET",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (!res.ok) {
@@ -52,11 +57,16 @@ export default function RestaurantManagement() {
   useEffect(() => {
     fetchRestaurants();
   }, []);
-  const filteredRestaurants = restaurants.filter((restaurant) => {
+   const filteredRestaurants = restaurants.filter((u) =>
+    `${u.name} ${u.street} ${u.city} ${u.email}  ${u.phone}  ${u.zipcode}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  );
+/*   const filteredRestaurants = restaurants.filter((restaurant) => {
     const name = restaurant.nom; // fallback to empty string
     const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
-  });
+  }); */
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
@@ -102,7 +112,10 @@ export default function RestaurantManagement() {
             >
               <X className="w-5 h-5" />
             </button>
-            <AddRestaurantPage fetchRestaurants={fetchRestaurants} setIsAddOpen={setIsAddOpen}/>
+            <AddRestaurantPage
+              fetchRestaurants={fetchRestaurants}
+              setIsAddOpen={setIsAddOpen}
+            />
           </div>
         </div>
       )}
@@ -150,10 +163,10 @@ export default function RestaurantManagement() {
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
                   <h3 className="text-lg font-bold text-gray-900 mb-1">
-                    {restaurant.nom}
+                    {restaurant.name}
                   </h3>
                   <p className="text-sm text-gray-600 mb-2">
-                    {restaurant.adresse}
+                    {restaurant.city}  {restaurant.street} {restaurant.zipcode}
                   </p>
                   {/* Temporary fake status until API returns it */}
                   <span
@@ -161,7 +174,7 @@ export default function RestaurantManagement() {
                       "active"
                     )}`}
                   >
-                    Active
+                    {restaurant.status}
                   </span>
                 </div>
                 <div className="flex space-x-2">
@@ -178,45 +191,21 @@ export default function RestaurantManagement() {
               <div className="space-y-3 mb-4">
                 <div className="flex items-center text-sm text-gray-600">
                   <Phone className="w-4 h-4 mr-2" />
-                  N/A
+                  {restaurant.phone}
                 </div>
                 <div className="flex items-center text-sm text-gray-600">
                   <Mail className="w-4 h-4 mr-2" />
-                  N/A
+                   {restaurant.email}
                 </div>
               </div>
 
-              {/* Stats Section */}
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
-                <div className="text-center">
-                  <div className="flex items-center justify-center mb-1">
-                    <Star className="w-4 h-4 text-yellow-400 mr-1" />
-                    <span className="font-semibold text-gray-900">0</span>
-                  </div>
-                  <p className="text-xs text-gray-600">Rating</p>
-                </div>
-                <div className="text-center">
-                  <div className="flex items-center justify-center mb-1">
-                    <Clock className="w-4 h-4 text-gray-400 mr-1" />
-                    <span className="font-semibold text-gray-900">0min</span>
-                  </div>
-                  <p className="text-xs text-gray-600">Delivery Time</p>
-                </div>
-                <div className="text-center">
-                  <p className="font-semibold text-gray-900">0</p>
-                  <p className="text-xs text-gray-600">Orders</p>
-                </div>
-                <div className="text-center">
-                  <p className="font-semibold text-gray-900">$0</p>
-                  <p className="text-xs text-gray-600">Revenue</p>
-                </div>
-              </div>
+          
             </div>
           </div>
         ))}
       </div>
 
-      {loading && <Loading />}
+      {loading && <Loading name="store"/>}
 
       {error && <p className="mt-4 text-red-500">{error}</p>}
     </div>
