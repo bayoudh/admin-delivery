@@ -24,7 +24,7 @@ const menuItems: MenuItem[] = [
     id: "delivery-person",
     label: "Delivery person",
     icon: UserPen,
-    url: "/delivery-person",
+    url: "/delivery-preson",
   },
   { id: "customers", label: "Customers", icon: Users, url: "/customers" },
   { id: "analytics", label: "Analytics", icon: BarChart3, url: "/analytics" },

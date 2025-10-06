@@ -4,6 +4,7 @@ export interface User {
   firstname: string;
   lastname: string;
   email: string;
+  phone:string;
   role: "customer" | "restaurant" | "driver";
 }
 export interface Category {
@@ -23,6 +24,16 @@ export interface Restaurant {
   restaurant_photo?: string;
   created_at: Date;
  
+}
+export interface driver {
+  id:string;
+   user_id:User;
+  vehicle_type?: string;
+  plate_number?: string;
+  status: "available" | "on_delivery" | "offline";
+  current_lat?: number;
+  current_lng?: number;
+  driver_photo?: string;
 }
 
 export interface Delivery {
