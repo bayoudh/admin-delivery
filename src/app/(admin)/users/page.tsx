@@ -2,7 +2,7 @@
 
 import { useAuthStore } from "@/lib/store/auth";
 import React, { useEffect, useState } from "react";
-import { Trash2, Edit3, Plus } from "lucide-react";
+import { Trash2, Edit3, Plus, Search, Filter } from "lucide-react";
 import { User } from "@/types/dashboard";
 import Loading from "@/components/reaction/Loading";
 import Pagination from "@/components/reaction/Pagination";
@@ -15,6 +15,8 @@ export default function UsersPage() {
   const token = useAuthStore.getState().token;
   const [entries, setEntries] = useState(10);
   const [page, setPage] = useState(1);
+  const [roleFilter, setRoleFilter] = useState("all"); // NEW
+
   const fetchUsers = async () => {
     try {
       if (!token) throw new Error("No auth token found");
@@ -31,7 +33,7 @@ export default function UsersPage() {
 
       const data: User[] = await res.json();
       setUsers(data);
-    }  catch (err) {
+    } catch (err) {
       console.error(err);
       setError("Failed to load users");
     } finally {
@@ -57,20 +59,27 @@ export default function UsersPage() {
       });
       if (!res.ok) throw new Error("Failed to delete user");
       setUsers(users.filter((user) => user.id !== id));
-    }catch (err: unknown) {
-    if (err instanceof Error) {
-      alert(err.message);
-    } else {
-      alert("An unexpected error occurred");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        alert(err.message);
+      } else {
+        alert("An unexpected error occurred");
+      }
     }
-  }
   };
 
-  const filteredUsers = users.filter((u) =>
-    `${u.firstname} ${u.lastname} ${u.email} ${u.role}`
+  const filteredUsers = users.filter((u) => {
+    const matchesSearch = `${u.firstname} ${u.lastname} ${u.email} ${u.role}`
       .toLowerCase()
-      .includes(search.toLowerCase())
-  );
+      .includes(search.toLowerCase());
+
+    const matchesRole =
+      roleFilter === "all"
+        ? true
+        : u.role.toLowerCase() === roleFilter.toLowerCase();
+
+    return matchesSearch && matchesRole;
+  });
   const totalPages = Math.ceil(filteredUsers.length / entries);
   const displayed = filteredUsers.slice((page - 1) * entries, page * entries);
 
@@ -84,6 +93,33 @@ export default function UsersPage() {
       <h1 className="text-3xl font-bold text-gray-900 mb-10">
         User Management
       </h1>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1 relative">
+            <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by name..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div className="flex items-center">
+            <Filter className="w-5 h-5 text-gray-400 mr-2" />
+            <select
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value)}
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="all">All Roles</option>
+              <option value="restaurant">Restaurant</option>
+              <option value="driver">Driver</option>
+              <option value="customer">Customer</option>
+            </select>
+          </div>
+        </div>
+      </div>
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center space-x-2">
           <label className="text-xl">Show</label>
@@ -100,22 +136,6 @@ export default function UsersPage() {
             <option value={25}>25</option>
           </select>
           <span className="text-xl">Entries</span>
-        </div>
-        <div className="flex items-center ">
-        <input
-          type="text"
-          placeholder="Search..."
-          className="border rounded-lg px-8 py-2 mr-1 text-xl focus:outline-none focus:ring focus:ring-blue-200"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        
-          <button
-            onClick={() => <h1>aa</h1>}
-            className=" rounded-lg  bg-blue-600 hover:bg-blue-700 text-white text-xl px-8 py-2 flex items-center justify-center font-medium transition-colors"
-          >
-            <Plus className="w-8 h-8 mr-2" />
-          </button>
         </div>
       </div>
 
