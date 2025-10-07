@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
 type Restaurant = {
@@ -21,7 +20,6 @@ export default function UpdateRestaurantPage({
   setIsAddOpen,
   restaurantToEdit,
 }: UpdateRestaurantPageProps) {
-  const router = useRouter();
 
   const [form, setForm] = useState({
     nom: "",

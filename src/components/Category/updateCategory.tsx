@@ -8,7 +8,12 @@ interface UpdateCategoryFormProps {
   id: string;
 }
 
-export default function UpdateCategoryForm({ onClose, token, fetchCategory, id }: UpdateCategoryFormProps) {
+export default function UpdateCategoryForm({
+  onClose,
+  token,
+  fetchCategory,
+  id,
+}: UpdateCategoryFormProps) {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -30,8 +35,14 @@ export default function UpdateCategoryForm({ onClose, token, fetchCategory, id }
 
       const data: Category = await res.json();
       setName(data.name); // populate input with current name
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Something went wrong");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -73,8 +84,12 @@ export default function UpdateCategoryForm({ onClose, token, fetchCategory, id }
       // Success → refresh categories and close modal
       fetchCategory();
       onClose();
-    } catch (err: any) {
-      setError(err.message || "Something went wrong");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Something went wrong");
+      }
     } finally {
       setLoading(false);
     }

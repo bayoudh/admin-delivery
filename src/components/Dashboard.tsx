@@ -1,7 +1,7 @@
 import React from 'react';
-import { StatCard } from './StatCard';
+/* import { StatCard } from './StatCard'; */
 //import { mockDashboardStats } from '../utils/mockData';
-import { DollarSign, Store, Truck, Users, TrendingUp, Clock, ShoppingBag, Star } from 'lucide-react';
+/* import { DollarSign, Store, Truck, Users, TrendingUp, Clock, ShoppingBag, Star } from 'lucide-react'; */
 
 export const Dashboard: React.FC = () => {
   //const stats = mockDashboardStats;
@@ -10,7 +10,7 @@ export const Dashboard: React.FC = () => {
     <div className="p-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard Overview</h1>
-        <p className="text-gray-600">Welcome back! Here's what's happening with your business today.</p>
+        <p className="text-gray-600">Welcome back! Here`&#39;`s what`&#39;`s happening with your business today.</p>
       </div>
 
       {/* Revenue Stats */}

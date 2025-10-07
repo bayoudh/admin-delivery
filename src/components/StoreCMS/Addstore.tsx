@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
 type AddRestaurantPageProps = {
@@ -12,7 +11,6 @@ export default function AddRestaurantPage({
   fetchRestaurants,
   setIsAddOpen,
 }: AddRestaurantPageProps) {
-  const router = useRouter();
 
   const [form, setForm] = useState({
     nom: "", // maps to "name"

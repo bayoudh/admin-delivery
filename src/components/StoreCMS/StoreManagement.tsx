@@ -1,14 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useCallback } from "react";
 import {
   Search,
   Filter,
   Plus,
   Edit,
   Trash2,
-  Star,
-  Clock,
   Phone,
   Mail,
   X,
@@ -22,13 +20,13 @@ export default function RestaurantManagement() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { token } = useAuthStore();
+  const token = useAuthStore.getState().token;
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<
     "all" | "active" | "inactive" | "pending"
   >("all");
   const [isAddOpen, setIsAddOpen] = useState(false);
-  const fetchRestaurants = async () => {
+  const fetchRestaurants =useCallback(async () =>{
     try {
       setLoading(true);
 
@@ -53,10 +51,10 @@ export default function RestaurantManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  },[token, setLoading, setRestaurants, setError]);
   useEffect(() => {
     fetchRestaurants();
-  }, []);
+  }, [fetchRestaurants]);
    const filteredRestaurants = restaurants.filter((u) =>
     `${u.name} ${u.street} ${u.city} ${u.email}  ${u.phone}  ${u.zipcode}`
       .toLowerCase()

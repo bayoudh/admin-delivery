@@ -6,7 +6,11 @@ interface AddCategoryFormProps {
   fetchCategory: () => void;
 }
 
-export default function AddCategoryForm({ onClose, token, fetchCategory }: AddCategoryFormProps) {
+export default function AddCategoryForm({
+  onClose,
+  token,
+  fetchCategory,
+}: AddCategoryFormProps) {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -45,8 +49,12 @@ export default function AddCategoryForm({ onClose, token, fetchCategory }: AddCa
       fetchCategory();
       setName("");
       onClose();
-    } catch (err: any) {
-      setError(err.message || "Something went wrong");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Something went wrong");
+      }
     } finally {
       setLoading(false);
     }

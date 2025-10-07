@@ -1,16 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import {
-  Search,
-  Filter,
-  Plus,
-  Edit,
-  Trash2,
-  Phone,
-  Mail,
-  X,
-} from "lucide-react";
+import React, { useCallback, useEffect, useState } from "react";
+import { Search, Filter, Plus, Edit, Trash2, Phone, Mail } from "lucide-react";
 
 import { driver } from "@/types/dashboard";
 import Loading from "../../../components/reaction/Loading";
@@ -20,13 +11,13 @@ export default function DriverManagement() {
   const [driver, setdriver] = useState<driver[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { token } = useAuthStore();
+  const token = useAuthStore.getState().token;
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<
     "all" | "active" | "inactive" | "pending"
   >("all");
   const [isAddOpen, setIsAddOpen] = useState(false);
-  const fetchdriver = async () => {
+  const fetchdriver = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -43,7 +34,7 @@ export default function DriverManagement() {
       }
 
       const data: driver[] = await res.json();
-      console.log("driver:", data);
+
       setdriver(data);
     } catch (err) {
       console.error(err);
@@ -51,11 +42,13 @@ export default function DriverManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, setLoading, setdriver, setError]);
   useEffect(() => {
-    fetchdriver();
-  }, []);
-   const filtereddriver = driver.filter((u) =>
+    if (token) {
+      fetchdriver();
+    }
+  }, [token,fetchdriver]);
+  const filtereddriver = driver.filter((u) =>
     `${u.user_id.firstname} ${u.user_id.lastname} ${u.user_id.phone} ${u.vehicle_type}  ${u.plate_number}  ${u.status} ${u.driver_photo}`
       .toLowerCase()
       .includes(searchTerm.toLowerCase())
@@ -95,8 +88,6 @@ export default function DriverManagement() {
           Add driver
         </button>
       </div>
-
-      
 
       {/* Filters */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
@@ -144,7 +135,7 @@ export default function DriverManagement() {
                     {driver.user_id.firstname}
                   </h3>
                   <p className="text-sm text-gray-600 mb-2">
-                    {driver.plate_number}  {driver.driver_photo} {driver.status}
+                    {driver.plate_number} {driver.driver_photo} {driver.status}
                   </p>
                   {/* Temporary fake status until API returns it */}
                   <span
@@ -173,17 +164,16 @@ export default function DriverManagement() {
                 </div>
                 <div className="flex items-center text-sm text-gray-600">
                   <Mail className="w-4 h-4 mr-2" />
-                   {driver.user_id.email}
+                  {driver.user_id.email}
                 </div>
               </div>
-
-          
             </div>
           </div>
         ))}
       </div>
+      {isAddOpen && <Loading name="Driver" />}
 
-      {loading && <Loading name="Driver"/>}
+      {loading && <Loading name="Driver" />}
 
       {error && <p className="mt-4 text-red-500">{error}</p>}
     </div>

@@ -15,16 +15,17 @@ export default function CategoriesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const { token } = useAuthStore();
+ /*  const { token } = useAuthStore(); */
   const [entries, setEntries] = useState(10);
   const [page, setPage] = useState(1);
   const [openAdd, setOpenAdd] = useState(false);
   const [openUpdate, setOpenUpdate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const [selectCategory,setSelectCategory]=useState("");
-
+  const token = useAuthStore.getState().token;
   const fetchCategory = async () => {
     try {
+       
       if (!token) throw new Error("No auth token found");
 
       const res = await fetch("/api/admin/categorystore", {
@@ -35,15 +36,19 @@ export default function CategoriesPage() {
         },
       });
 
-      if (!res.ok) throw new Error("Failed to fetch categories");
+      //if (!res.ok) throw new Error("Failed to fetch categories");
 
       const data: Category[] = await res.json();
       setCategories(data);
-    } catch (err: any) {
+    } catch (err: unknown) {
+    if (err instanceof Error) {
       setError(err.message);
-    } finally {
-      setLoading(false);
+    } else {
+      setError("An unexpected error occurred");
     }
+  } finally {
+    setLoading(false);
+  }
   };
 
   useEffect(() => {
@@ -72,9 +77,13 @@ const handleUpdate=(id:string)=>{
       if (!res.ok) throw new Error("Failed to delete category");
       setCategories(categories.filter((c) => c.id !== id));
       setOpenDelete(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
+    if (err instanceof Error) {
       alert(err.message);
+    } else {
+      alert("An unexpected error occurred");
     }
+  }
   };
 
   const filteredCategories = categories.filter((c) =>

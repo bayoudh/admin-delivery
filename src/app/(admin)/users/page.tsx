@@ -12,7 +12,7 @@ export default function UsersPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState<string>("");
-  const { token } = useAuthStore();
+  const token = useAuthStore.getState().token;
   const [entries, setEntries] = useState(10);
   const [page, setPage] = useState(1);
   const fetchUsers = async () => {
@@ -31,8 +31,9 @@ export default function UsersPage() {
 
       const data: User[] = await res.json();
       setUsers(data);
-    } catch (err: any) {
-      setError(err.message);
+    }  catch (err) {
+      console.error(err);
+      setError("Failed to load users");
     } finally {
       setLoading(false);
     }
@@ -56,9 +57,13 @@ export default function UsersPage() {
       });
       if (!res.ok) throw new Error("Failed to delete user");
       setUsers(users.filter((user) => user.id !== id));
-    } catch (err: any) {
+    }catch (err: unknown) {
+    if (err instanceof Error) {
       alert(err.message);
+    } else {
+      alert("An unexpected error occurred");
     }
+  }
   };
 
   const filteredUsers = users.filter((u) =>
