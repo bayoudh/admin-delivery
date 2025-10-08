@@ -2,7 +2,7 @@
 
 import { useAuthStore } from "@/lib/store/auth";
 import React, { useEffect, useState } from "react";
-import { Trash2, Edit3, Plus, Search, Filter } from "lucide-react";
+import { Trash2, Edit3, Search, Filter } from "lucide-react";
 import { User } from "@/types/dashboard";
 import Loading from "@/components/reaction/Loading";
 import Pagination from "@/components/reaction/Pagination";

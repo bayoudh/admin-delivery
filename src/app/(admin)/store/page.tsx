@@ -3,8 +3,8 @@ import type { Metadata } from 'next'
 
 
 export const metadata: Metadata = {
-  title: 'restaurant',
-  description: 'application restaurant',
+  title: 'Store',
+  description: 'Manager Store',
 }
 
 export default function DashboardPage() {

@@ -11,7 +11,6 @@ export default function AddRestaurantPage({
   fetchRestaurants,
   setIsAddOpen,
 }: AddRestaurantPageProps) {
-
   const [form, setForm] = useState({
     nom: "", // maps to "name"
     adresse: "", // maps to "cuisine" or address
@@ -47,33 +46,140 @@ export default function AddRestaurantPage({
 
   return (
     <div className="p-6 max-w-2xl mx-auto bg-white rounded-lg flex flex-col items-center justify-center">
-      <h1 className="text-2xl font-bold mb-4">Add New Restaurant</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Nom Restaurant
-          </label>
-          <input
-            type="text"
-            name="nom"
-            value={form.nom}
-            onChange={handleChange}
-            required
-            className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Adresse
-          </label>
-          <input
-            type="text"
-            name="adresse"
-            value={form.adresse}
-            onChange={handleChange}
-            required
-            className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          />
+      <h1 className="text-2xl font-bold mb-4">Add New Store</h1>
+      <form onSubmit={handleSubmit} className="space-y-4  ">
+        <div className="grid grid-cols-2 gap-3">
+          <div >
+            <label className="block text-sm font-medium text-gray-700">
+              Firstname Bigboss Restaurant
+            </label>
+            <input
+              type="text"
+              name="nom"
+              value={form.nom}
+              onChange={handleChange}
+              required
+              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              lastname Bigboss Restaurant
+            </label>
+            <input
+              type="text"
+              name="nom"
+              value={form.nom}
+              onChange={handleChange}
+              required
+              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Email Restaurant
+            </label>
+            <input
+              type="text"
+              name="nom"
+              value={form.nom}
+              onChange={handleChange}
+              required
+              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Password
+            </label>
+            <input
+              type="password"
+              name="password"
+              value={form.nom}
+              onChange={handleChange}
+              required
+              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Phone Restaurant
+            </label>
+            <input
+              type="text"
+              name="nom"
+              value={form.nom}
+              onChange={handleChange}
+              required
+              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Nom Restaurant
+            </label>
+            <input
+              type="text"
+              name="nom"
+              value={form.nom}
+              onChange={handleChange}
+              required
+              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              street
+            </label>
+            <input
+              type="text"
+              name="adresse"
+              value={form.adresse}
+              onChange={handleChange}
+              required
+              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              city
+            </label>
+            <input
+              type="text"
+              name="adresse"
+              value={form.adresse}
+              onChange={handleChange}
+              required
+              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              zipcode
+            </label>
+            <input
+              type="text"
+              name="adresse"
+              value={form.adresse}
+              onChange={handleChange}
+              required
+              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              photo
+            </label>
+            <input
+              type="file"
+              name="adresse"
+              value={form.adresse}
+              onChange={handleChange}
+              required
+              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
         </div>
         <div>
           <button

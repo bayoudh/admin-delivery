@@ -84,10 +84,10 @@ export default function RestaurantManagement() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Restaurant Management
+            Store Management
           </h1>
           <p className="text-gray-600">
-            Manage all registered restaurants and their performance.
+            Manage all registered stores and their performance.
           </p>
         </div>
         <button
@@ -96,7 +96,7 @@ export default function RestaurantManagement() {
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center font-medium transition-colors"
         >
           <Plus className="w-4 h-4 mr-2" />
-          Add Restaurant
+          Add Store
         </button>
       </div>
 
