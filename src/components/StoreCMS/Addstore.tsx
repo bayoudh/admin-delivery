@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
@@ -46,9 +47,19 @@ export default function AddRestaurantPage({
 
     try {
       const formData = new FormData();
-      Object.entries(form).forEach(([key, value]) => {
-        if (value) formData.append(key, value as any);
-      });
+          Object.entries(form).forEach(([key, value]) => {
+      if (!value) return; // skip null or empty
+
+      // Handle string values
+      if (typeof value === "string") {
+        formData.append(key, value);
+      }
+
+      // Handle File (photo) values
+      if (value instanceof File) {
+        formData.append(key, value);
+      }
+    });
 
       const res = await fetch("/api/restaurants", {
         method: "POST",
@@ -215,7 +226,7 @@ export default function AddRestaurantPage({
 
               {form.photoPreview && (
                 <div className="mt-3">
-                  <img
+                  <Image
                     src={form.photoPreview}
                     alt="Preview"
                     className="h-32 w-32 object-cover rounded-lg border"
