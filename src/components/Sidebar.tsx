@@ -1,5 +1,5 @@
 "use client";
-import React, {useState } from "react";
+import React, { useState } from "react";
 import { useAuthStore } from "../lib/store/auth";
 import {
   BarChart3,
@@ -10,23 +10,30 @@ import {
   Truck,
   UserPen,
   Users,
-  CheckLine
+  CheckLine,
 } from "lucide-react";
 import { MenuItem } from "../types/dashboard";
-import {  useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 const menuItems: MenuItem[] = [
   { id: "dashboard", label: "Dashboard", icon: Home, url: "/dashboard" },
   { id: "Users", label: "Users", icon: Users, url: "/users" },
-  { id: "Catogory Store", label: "Catogory Store", icon: CheckLine, url: "/catogory-store" },
+  {
+    id: "Category Store",
+    label: "Category Store",
+    icon: CheckLine,
+    url: "/category-store",
+  },
   { id: "Store", label: "Store", icon: Store, url: "/store" },
-  { id: "deliveries", label: "Deliveries", icon: Truck, url: "/deliveries" },
   {
     id: "delivery-person",
     label: "Delivery person",
     icon: UserPen,
     url: "/delivery-preson",
   },
-  { id: "customers", label: "Customers", icon: Users, url: "/customers" },
+   { id: "customers", label: "Customers", icon: Users, url: "/customers" },
+  { id: "deliveries", label: "Deliveries", icon: Truck, url: "/deliveries" },
+
+ 
   { id: "analytics", label: "Analytics", icon: BarChart3, url: "/analytics" },
   { id: "settings", label: "Settings", icon: Settings, url: "/settings" },
 ];
@@ -36,21 +43,19 @@ export const Sidebar: React.FC = () => {
 
   const [activeSection, setActiveSection] = useState("");
 
-
   function gonav(item: MenuItem) {
     setActiveSection(item.id);
     router.push(`${item.url}`);
   }
   const logout = useAuthStore((state) => state.logout);
   const handleLogout = async () => {
-  try {
-  
-     logout();
-    router.push("/");
-  } catch (err) {
-    console.error("Logout failed", err);
-  }
-};
+    try {
+      logout();
+      router.push("/");
+    } catch (err) {
+      console.error("Logout failed", err);
+    }
+  };
 
   return (
     <div className="w-64 bg-white shadow-lg h-screen fixed left-0 top-0">
