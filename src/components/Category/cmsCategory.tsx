@@ -212,7 +212,7 @@ const handleUpdate=(id:string)=>{
       {openAdd && <AddCategoryForm onClose={() => setOpenAdd(false)} token={token}  fetchCategory={fetchCategory}/>}
       {openUpdate && <UpdateCategoryForm onClose={() => setOpenUpdate(false)} token={token}  fetchCategory={fetchCategory} id={selectCategory} />}
       {openDelete && (
-        <DeletePopup onConfirm={handleDelete} onCancel={() => setOpenDelete(false)} id={selectCategory}/>
+        <DeletePopup name={"category"} onConfirm={handleDelete} onCancel={() => setOpenDelete(false)} id={selectCategory}/>
       )}
     </div>
   );
