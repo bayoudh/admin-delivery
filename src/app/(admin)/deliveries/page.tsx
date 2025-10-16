@@ -1,56 +1,20 @@
+"use client";
+import React from "react";
 
-"use client"
-import React, { useState } from "react";
-
-export default function AddCategoryForm() {
-  const [name, setName] = useState("");
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!name.trim()) {
-      alert("Please enter a category name");
-      return;
-    }
-
-    // For now just log the category name
-    console.log("New Category:", name);
-
-    // Reset input after submit
-    setName("");
-  };
+export default function DeliveriesPages() {
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="absolute z-10 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 
-             flex flex-col space-y-3 p-6 border rounded-lg bg-white shadow-lg w-80"
-    >
-      
-      <label className="font-semibold text-gray-700">Add Category Store</label>
+    <div className="bg-white flex items-center justify-center min-h-screen [perspective:1200px]">
 
-      <input
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="Enter category name"
-        className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
-      <div className="grid grid-cols-2">
-        <button
-        type="button"
-        className="px-6 py-2 rounded-lg border bg-blue-500 text-white hover:bg-blue-600 focus:ring-2 focus:ring-blue-500"
+      <h1
+        className="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600
+               transform rotate-x-12 rotate-y-6 translate-z-10
+               drop-shadow-[0_5px_20px_rgba(0,0,0,0.6)]
+               [text-shadow:_0_4px_10px_rgba(0,0,0,0.9),_0_0_20px_rgba(59,130,246,0.8)]
+               transition-all duration-700 ease-in-out hover:rotate-x-0 hover:rotate-y-0 hover:scale-110 hover:[text-shadow:_0_0_35px_rgba(59,130,246,1),_0_0_50px_rgba(147,51,234,1)]"
       >
-        cancel
-      </button>
-      <button
-        type="submit"
-        className="px-6 py-2 rounded-lg border bg-blue-500 text-white hover:bg-blue-600 focus:ring-2 focus:ring-blue-500"
-      >
-        +
-      </button>
-      </div>
-      
-    </form>
+        Coming Soon
+      </h1>
+    </div>
   );
 }
