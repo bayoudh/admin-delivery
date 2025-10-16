@@ -111,6 +111,7 @@ export default function RestaurantManagement() {
               <X className="w-5 h-5" />
             </button>
             <AddRestaurantPage
+              token={token}
               fetchRestaurants={fetchRestaurants}
               setIsAddOpen={setIsAddOpen}
             />
