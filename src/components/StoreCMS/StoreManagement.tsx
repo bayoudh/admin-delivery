@@ -1,25 +1,44 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
-import { Search, Filter, Plus, Edit, Trash2, Phone, Mail, X ,User2Icon,} from "lucide-react";
+import {
+  Search,
+  Filter,
+  Plus,
+  Edit,
+  Trash2,
+  Phone,
+  Mail,
+  X,
+  User2Icon,
+} from "lucide-react";
 import AddRestaurantPage from "./Addstore";
-import { Restaurant } from "@/types/dashboard";
+import UpdateRestaurantPage from "./UpdateStore";
+import DeletePopup from "../reaction/DeletePopup"; // ✅ Make sure this path is correct
 import Loading from "../reaction/Loading";
 import { useAuthStore } from "@/lib/store/auth";
+import { Restaurant } from "@/types/dashboard";
 
 export default function RestaurantManagement() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const token = useAuthStore.getState().token;
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "closed">("all");
   const [isAddOpen, setIsAddOpen] = useState(false);
 
+  // ✅ For Edit and Delete
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [selectedStore, setSelectedStore] = useState<string | null>(null);
+  const [openDelete, setOpenDelete] = useState(false);
+  const [selectedDeleteId, setSelectedDeleteId] = useState<string | null>(null);
+
+  const token = useAuthStore.getState().token;
+
+  // ✅ Fetch all restaurants
   const fetchRestaurants = useCallback(async () => {
     try {
       setLoading(true);
-
       const res = await fetch("/api/admin/restaurant", {
         method: "GET",
         headers: {
@@ -29,9 +48,7 @@ export default function RestaurantManagement() {
       });
 
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-
       const data: Restaurant[] = await res.json();
-      console.log("Restaurants:", data);
       setRestaurants(data);
     } catch (err) {
       console.error(err);
@@ -45,6 +62,25 @@ export default function RestaurantManagement() {
     fetchRestaurants();
   }, [fetchRestaurants]);
 
+  // ✅ Delete handler
+  const handleDelete = async (id: string) => {
+    try {
+      const res = await fetch(`/api/admin/restaurant/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) throw new Error("Failed to delete restaurant");
+
+      setRestaurants((prev) => prev.filter((r) => r.id !== id));
+      setOpenDelete(false);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to delete restaurant");
+    }
+  };
+
+  // ✅ Filtering
   const filteredRestaurants = restaurants.filter((r) => {
     const matchesSearch = `${r.name} ${r.city} ${r.phone} ${r.email}`
       .toLowerCase()
@@ -72,12 +108,8 @@ export default function RestaurantManagement() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Store Management
-          </h1>
-          <p className="text-gray-600">
-            Manage all registered stores and their performance.
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Store Management</h1>
+          <p className="text-gray-600">Manage all registered stores and their performance.</p>
         </div>
         <button
           type="button"
@@ -89,7 +121,7 @@ export default function RestaurantManagement() {
         </button>
       </div>
 
-      {/* Add Modal */}
+      {/* ✅ Add Modal */}
       {isAddOpen && (
         <div className="fixed inset-0 z-30 bg-gray-600/50 flex justify-center items-center">
           <div className="relative bg-white rounded-xl shadow-lg p-6 max-w-2xl w-full">
@@ -125,9 +157,7 @@ export default function RestaurantManagement() {
             <Filter className="w-5 h-5 text-gray-400 mr-2" />
             <select
               value={statusFilter}
-              onChange={(e) =>
-                setStatusFilter(e.target.value as typeof statusFilter)
-              }
+              onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
               className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="all">All Status</option>
@@ -138,7 +168,7 @@ export default function RestaurantManagement() {
         </div>
       </div>
 
-      {/* Restaurant Grid */}
+      {/* ✅ Restaurant Grid */}
       {loading ? (
         <Loading name="store" />
       ) : filteredRestaurants.length === 0 ? (
@@ -154,9 +184,7 @@ export default function RestaurantManagement() {
                 {/* Top Section */}
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h3 className="text-lg font-bold text-gray-900 mb-1">
-                      {restaurant.name}
-                    </h3>
+                    <h3 className="text-lg font-bold text-gray-900 mb-1">{restaurant.name}</h3>
                     <p className="text-sm text-gray-600 mb-2">
                       {restaurant.street && `${restaurant.street}, `}
                       {restaurant.city && `${restaurant.city}, `}
@@ -177,10 +205,22 @@ export default function RestaurantManagement() {
                     </span>
                   </div>
                   <div className="flex space-x-2">
-                    <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                    <button
+                      onClick={() => {
+                        setSelectedStore(restaurant.id);
+                        setIsEditOpen(true);
+                      }}
+                      className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    >
                       <Edit className="w-4 h-4" />
                     </button>
-                    <button className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                    <button
+                      onClick={() => {
+                        setSelectedDeleteId(restaurant.id);
+                        setOpenDelete(true);
+                      }}
+                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
@@ -188,38 +228,70 @@ export default function RestaurantManagement() {
 
                 {/* Contact Info */}
                 <div className="grid grid-cols-2">
-                <div className="space-y-2 text-sm text-gray-700">
-                  {restaurant.phone && (
-                    <div className="flex items-center">
-                      <Phone className="w-4 h-4 mr-2 text-gray-500" />
-                      <span>{restaurant.phone}</span>
-                    </div>
-                  )}
-                  {restaurant.email && (
-                    <div className="flex items-center">
-                      <Mail className="w-4 h-4 mr-2 text-gray-500" />
-                      <span>{restaurant.email}</span>
-                    </div>
-                  )}
+                  <div className="space-y-2 text-sm text-gray-700">
+                    {restaurant.email && (
+                      <div className="flex items-center">
+                        <Mail className="w-4 h-4 mr-2 text-gray-500" />
+                        <span>{restaurant.email}</span>
+                      </div>
+                    )}
+                    {restaurant.phone && (
+                      <div className="flex items-center">
+                        <Phone className="w-4 h-4 mr-2 text-gray-500" />
+                        <span>{restaurant.phone}</span>
+                      </div>
+                    )}
                   </div>
-                  {restaurant.user_id&&(
+
+                  {restaurant.user_id && (
                     <div className="space-y-2 text-sm text-gray-700">
                       <div className="flex items-center">
-                      <User2Icon className="w-4 h-4 mr-2 text-gray-500" />
-                      <span>{restaurant.user_id.firstname} {restaurant.user_id.lastname}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Phone className="w-4 h-4 mr-2 text-gray-500" />
-                      <span>{restaurant.user_id.phone}</span>
-                    </div>
+                        <User2Icon className="w-4 h-4 mr-2 text-gray-500" />
+                        <span>
+                          {restaurant.user_id.firstname} {restaurant.user_id.lastname}
+                        </span>
+                      </div>
+                      <div className="flex items-center">
+                        <Phone className="w-4 h-4 mr-2 text-gray-500" />
+                        <span>{restaurant.user_id.phone}</span>
+                      </div>
                     </div>
                   )}
                 </div>
-                </div>
               </div>
-            
+            </div>
           ))}
         </div>
+      )}
+
+      {/* ✅ Edit Modal */}
+      {isEditOpen && selectedStore && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-xl shadow-lg p-6 max-w-2xl w-full relative">
+            <button
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+              onClick={() => setIsEditOpen(false)}
+            >
+              ✕
+            </button>
+            <UpdateRestaurantPage
+              restaurantId={selectedStore}
+              setIsEditOpen={setIsEditOpen}
+              token={token}
+              fetchRestaurants={fetchRestaurants}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ✅ Delete Popup */}
+      {openDelete && selectedDeleteId && (
+        <DeletePopup
+          name="store"
+          id={selectedDeleteId}
+          onConfirm={handleDelete}
+          onCancel={() => setOpenDelete(false)}
+        />
       )}
 
       {error && <p className="mt-4 text-red-500 text-center">{error}</p>}

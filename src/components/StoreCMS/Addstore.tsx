@@ -106,13 +106,13 @@ export default function AddRestaurantPage({
         return;
       }
 
-      toast.success("Restaurant added successfully!");
+      toast.success("Store added successfully!");
       fetchRestaurants();
       setIsAddOpen(false);
     } catch (error) {
-      console.error("Error adding restaurant:", error);
-      setError("Failed to add restaurant. Please try again later.");
-      toast.error("Failed to add restaurant.");
+      console.error("Error adding Store:", error);
+      setError("Failed to add Store. Please try again later.");
+      toast.error("Failed to add Store.");
     }
   };
 
@@ -201,7 +201,7 @@ export default function AddRestaurantPage({
 
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Restaurant Name
+              Store Name
             </label>
             <input
               type="text"
