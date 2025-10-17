@@ -1,16 +1,7 @@
 "use client";
 
-import React, { useEffect, useState,useCallback } from "react";
-import {
-  Search,
-  Filter,
-  Plus,
-  Edit,
-  Trash2,
-  Phone,
-  Mail,
-  X,
-} from "lucide-react";
+import React, { useEffect, useState, useCallback } from "react";
+import { Search, Filter, Plus, Edit, Trash2, Phone, Mail, X ,User2Icon,} from "lucide-react";
 import AddRestaurantPage from "./Addstore";
 import { Restaurant } from "@/types/dashboard";
 import Loading from "../reaction/Loading";
@@ -22,15 +13,14 @@ export default function RestaurantManagement() {
   const [error, setError] = useState<string | null>(null);
   const token = useAuthStore.getState().token;
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<
-    "all" | "active" | "inactive" | "pending"
-  >("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "closed">("all");
   const [isAddOpen, setIsAddOpen] = useState(false);
-  const fetchRestaurants =useCallback(async () =>{
+
+  const fetchRestaurants = useCallback(async () => {
     try {
       setLoading(true);
 
-      const res = await fetch("api/admin/restaurant", {
+      const res = await fetch("/api/admin/restaurant", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -38,9 +28,7 @@ export default function RestaurantManagement() {
         },
       });
 
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
       const data: Restaurant[] = await res.json();
       console.log("Restaurants:", data);
@@ -51,28 +39,29 @@ export default function RestaurantManagement() {
     } finally {
       setLoading(false);
     }
-  },[token, setLoading, setRestaurants, setError]);
+  }, [token]);
+
   useEffect(() => {
     fetchRestaurants();
   }, [fetchRestaurants]);
-   const filteredRestaurants = restaurants.filter((u) =>
-    `${u.name} ${u.street} ${u.city} ${u.email}  ${u.phone}  ${u.zipcode}`
+
+  const filteredRestaurants = restaurants.filter((r) => {
+    const matchesSearch = `${r.name} ${r.city} ${r.phone} ${r.email}`
       .toLowerCase()
-      .includes(searchTerm.toLowerCase())
-  );
-/*   const filteredRestaurants = restaurants.filter((restaurant) => {
-    const name = restaurant.nom; // fallback to empty string
-    const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesSearch;
-  }); */
+      .includes(searchTerm.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === "all" || (r.status || "active") === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
         return "bg-green-100 text-green-800";
-      case "inactive":
+      case "closed":
         return "bg-red-100 text-red-800";
-      case "pending":
-        return "bg-amber-100 text-amber-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -126,7 +115,7 @@ export default function RestaurantManagement() {
             <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="Search by name..."
+              placeholder="Search by name, city, or phone..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -143,70 +132,97 @@ export default function RestaurantManagement() {
             >
               <option value="all">All Status</option>
               <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="pending">Pending</option>
+              <option value="closed">Closed</option>
             </select>
           </div>
         </div>
       </div>
 
       {/* Restaurant Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {filteredRestaurants.map((restaurant) => (
-          <div
-            key={restaurant.id}
-            className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
-          >
-            <div className="p-6">
-              {/* Top Section */}
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-gray-900 mb-1">
-                    {restaurant.name}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-2">
-                    {restaurant.city}  {restaurant.street} {restaurant.zipcode}
-                  </p>
-                  {/* Temporary fake status until API returns it */}
-                  <span
-                    className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                      "active"
-                    )}`}
-                  >
-                    {restaurant.status}
-                  </span>
+      {loading ? (
+        <Loading name="store" />
+      ) : filteredRestaurants.length === 0 ? (
+        <p className="text-center text-gray-500 mt-10">No stores found.</p>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          {filteredRestaurants.map((restaurant) => (
+            <div
+              key={restaurant.id}
+              className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+            >
+              <div className="p-6">
+                {/* Top Section */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-gray-900 mb-1">
+                      {restaurant.name}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-2">
+                      {restaurant.street && `${restaurant.street}, `}
+                      {restaurant.city && `${restaurant.city}, `}
+                      {restaurant.zipcode && `ZIP: ${restaurant.zipcode}`}
+                      <br />
+                      {restaurant.category_id?.name && (
+                        <span className="text-blue-600 font-medium">
+                          {restaurant.category_id.name}
+                        </span>
+                      )}
+                    </p>
+                    <span
+                      className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                        restaurant.status || "active"
+                      )}`}
+                    >
+                      {restaurant.status || "Active"}
+                    </span>
+                  </div>
+                  <div className="flex space-x-2">
+                    <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
-                <div className="flex space-x-2">
-                  <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                    <Edit className="w-4 h-4" />
-                  </button>
-                  <button className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+
+                {/* Contact Info */}
+                <div className="grid grid-cols-2">
+                <div className="space-y-2 text-sm text-gray-700">
+                  {restaurant.phone && (
+                    <div className="flex items-center">
+                      <Phone className="w-4 h-4 mr-2 text-gray-500" />
+                      <span>{restaurant.phone}</span>
+                    </div>
+                  )}
+                  {restaurant.email && (
+                    <div className="flex items-center">
+                      <Mail className="w-4 h-4 mr-2 text-gray-500" />
+                      <span>{restaurant.email}</span>
+                    </div>
+                  )}
+                  </div>
+                  {restaurant.user_id&&(
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <div className="flex items-center">
+                      <User2Icon className="w-4 h-4 mr-2 text-gray-500" />
+                      <span>{restaurant.user_id.firstname} {restaurant.user_id.lastname}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Phone className="w-4 h-4 mr-2 text-gray-500" />
+                      <span>{restaurant.user_id.phone}</span>
+                    </div>
+                    </div>
+                  )}
+                </div>
                 </div>
               </div>
+            
+          ))}
+        </div>
+      )}
 
-              {/* Info Section (fake data until API sends real) */}
-              <div className="space-y-3 mb-4">
-                <div className="flex items-center text-sm text-gray-600">
-                  <Phone className="w-4 h-4 mr-2" />
-                  {restaurant.phone}
-                </div>
-                <div className="flex items-center text-sm text-gray-600">
-                  <Mail className="w-4 h-4 mr-2" />
-                   {restaurant.email}
-                </div>
-              </div>
-
-          
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {loading && <Loading name="store"/>}
-
-      {error && <p className="mt-4 text-red-500">{error}</p>}
+      {error && <p className="mt-4 text-red-500 text-center">{error}</p>}
     </div>
   );
 }

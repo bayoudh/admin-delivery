@@ -15,6 +15,7 @@ export interface Category {
 export interface Restaurant {
   id: string;
   name: string;
+  category_id:Category;
   email?: string;
   phone?: string;
   street?: string;
@@ -23,7 +24,7 @@ export interface Restaurant {
   status: "active" | "closed";
   restaurant_photo?: string;
   created_at: Date;
- 
+  user_id:User
 }
 export interface driver {
   id:string;
