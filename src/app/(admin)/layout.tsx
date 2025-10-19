@@ -9,12 +9,18 @@ export default function RootLayout({
 }>) {
   
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+  <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
+      {/* Sidebar */}
       <Sidebar />
-      <div className="flex-1 ml-64">
-        {children}
+
+      {/* Main Content */}
+      <main className="flex-1 pt-16 lg:pt-0 lg:ml-64 transition-all duration-300">
+        {/* Page content */}
+        <div className="p-4">{children}</div>
+
+        {/* Toast notifications */}
         <ToastContainer position="top-right" autoClose={3000} />
-      </div>
+      </main>
     </div>
   );
 }
