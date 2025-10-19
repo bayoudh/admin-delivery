@@ -126,7 +126,7 @@ export default function UpdateCategoryForm({
           </button>
           <button
             type="submit"
-            className="px-6 py-2 rounded-lg border bg-blue-500 text-white hover:bg-blue-600 focus:ring-2 focus:ring-blue-500"
+            className="px-6 py-2 rounded-lg border bg-yellow-600 hover:bg-yellow-700 text-white0 focus:ring-2 focus:ring-yellow-500"
             disabled={loading}
           >
             {loading ? "Updating..." : "Update"}

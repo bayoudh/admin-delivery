@@ -232,7 +232,7 @@ export default function UpdateUserPage({
 
         <button
           type="submit"
-          className="bg-green-600 hover:bg-green-700 text-white px-4 w-full py-4 rounded-lg font-medium transition-colors"
+          className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 w-full py-4 rounded-lg font-medium transition-colors"
         >
           UPDATE
         </button>

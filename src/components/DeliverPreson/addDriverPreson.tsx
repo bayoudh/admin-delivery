@@ -4,17 +4,17 @@ import Image from "next/image";
 import {  useState } from "react";
 import { toast } from "react-toastify";
 
-type AddRestaurantPageProps = {
-  fetchRestaurants: () => void;
+type AddDriversPageProps = {
+  fetchDrivers: () => void;
   setIsAddOpen: (open: boolean) => void;
   token: string | null;
 };
 
-export default function AddRestaurantPage({
-  fetchRestaurants,
+export default function AddDriversPage({
+  fetchDrivers,
   setIsAddOpen,
   token,
-}: AddRestaurantPageProps) {
+}: AddDriversPageProps) {
   const [form, setForm] = useState({
     firstname: "",
     lastname: "",
@@ -26,7 +26,7 @@ export default function AddRestaurantPage({
     street: "",
     city: "",
     zipcode: "",
-    restaurant_photo: null as File | null,
+    driver_photo: null as File | null,
     photoPreview: null as string | null,
   });
 
@@ -63,7 +63,7 @@ export default function AddRestaurantPage({
         if (value instanceof File) formData.append(key, value);
       });
 
-      const res = await fetch("/api/admin/driver?folder=driver", {
+      const res = await fetch("/api/admin/driver", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -79,7 +79,7 @@ export default function AddRestaurantPage({
       }
 
       toast.success("Store added successfully!");
-      fetchRestaurants();
+      fetchDrivers();
       setIsAddOpen(false);
     } catch (error) {
       console.error("Error adding Store:", error);
@@ -177,7 +177,7 @@ export default function AddRestaurantPage({
             </label>
             <input
               type="text"
-              name="name"
+              name="vehicle_type"
               value={form.vehicle_type}
               onChange={handleChange}
               required
@@ -191,7 +191,7 @@ export default function AddRestaurantPage({
             </label>
             <input
               type="text"
-              name="name"
+              name="plate_number"
               value={form.plate_number}
               onChange={handleChange}
               required
@@ -251,7 +251,7 @@ export default function AddRestaurantPage({
               name="driver_photo"
               accept="image/*"
               onChange={handleChange}
-              required
+              
               className="w-full mt-1 px-4 py-2 border rounded-lg"
             />
 

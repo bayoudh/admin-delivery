@@ -1,10 +1,14 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { Search, Filter, Plus, Edit, Trash2, Phone, Mail } from "lucide-react";
+import { Search, Filter, Plus, Edit, Trash2, Phone, Mail, X } from "lucide-react";
 import { driver } from "@/types/dashboard";
 import Loading from "../../components/reaction/Loading";
 import { useAuthStore } from "@/lib/store/auth";
+import AddDriversPage from "./addDriverPreson";
+import DeletePopup from "@/components/reaction/DeletePopup";
+import { toast } from "react-toastify";
+import UpdateDriverPage from "./updateDriver";
 
 export default function DriverPresonManagement() {
   const [driverList, setDriverList] = useState<driver[]>([]);
@@ -17,10 +21,19 @@ export default function DriverPresonManagement() {
   >("all");
   const [isAddOpen, setIsAddOpen] = useState(false);
 
+  // ✅ Edit modal states
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [selectedDriver, setSelectedDriver] = useState<string | null>(null);
+
+  // ✅ Delete popup states
+  const [openDelete, setOpenDelete] = useState(false);
+  const [selectedDeleteId, setSelectedDeleteId] = useState<string | null>(null);
+
+  // ✅ Fetch drivers
   const fetchDrivers = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch("api/admin/driver", {
+      const res = await fetch("/api/admin/driver", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -29,7 +42,6 @@ export default function DriverPresonManagement() {
       });
 
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-
       const data: driver[] = await res.json();
       setDriverList(data);
     } catch (err) {
@@ -44,17 +56,40 @@ export default function DriverPresonManagement() {
     if (token) fetchDrivers();
   }, [token, fetchDrivers]);
 
+  // ✅ Handle delete driver
+  const handleDelete = async (id: string) => {
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/admin/driver/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Failed to delete driver");
+
+      toast.success("Driver deleted successfully");
+      setOpenDelete(false);
+      fetchDrivers();
+    } catch (error) {
+      console.error(error);
+      toast.error("Error deleting driver");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ Filter logic
   const filteredDrivers = driverList.filter((d) => {
-    const matchesSearch = `${d.user_id.firstname} ${d.user_id.lastname} ${d.user_id.phone} ${d.vehicle_type} ${d.plate_number} ${d.status}`
+    const matchesSearch = `${d.user_id?.firstname} ${d.user_id?.lastname} ${d.user_id?.phone} ${d.vehicle_type} ${d.plate_number} ${d.status}`
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
-
-    const matchesStatus =
-      statusFilter === "all" ? true : d.status === statusFilter;
-
+    const matchesStatus = statusFilter === "all" ? true : d.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
+  // ✅ Status color helper
   const getStatusColor = (status: "available" | "on_delivery" | "offline") => {
     switch (status) {
       case "available":
@@ -62,7 +97,6 @@ export default function DriverPresonManagement() {
       case "on_delivery":
         return "bg-yellow-100 text-yellow-800";
       case "offline":
-        return "bg-gray-100 text-gray-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -73,9 +107,7 @@ export default function DriverPresonManagement() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Driver Management
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Driver Management</h1>
           <p className="text-gray-600">
             Manage all registered drivers and their current delivery status.
           </p>
@@ -89,6 +121,25 @@ export default function DriverPresonManagement() {
           Add driver
         </button>
       </div>
+
+      {/* Add Driver Modal */}
+      {isAddOpen && (
+        <div className="fixed inset-0 z-30 bg-gray-600/50 flex justify-center items-center">
+          <div className="relative bg-white rounded-xl shadow-lg p-6 max-w-2xl w-full">
+            <button
+              onClick={() => setIsAddOpen(false)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-red-500"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <AddDriversPage
+              fetchDrivers={fetchDrivers}
+              setIsAddOpen={setIsAddOpen}
+              token={token}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
@@ -107,9 +158,7 @@ export default function DriverPresonManagement() {
             <Filter className="w-5 h-5 text-gray-400 mr-2" />
             <select
               value={statusFilter}
-              onChange={(e) =>
-                setStatusFilter(e.target.value as typeof statusFilter)
-              }
+              onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
               className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="all">All Status</option>
@@ -125,15 +174,14 @@ export default function DriverPresonManagement() {
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {filteredDrivers.map((d) => (
           <div
-            key={d.id}
+            key={d.id || d.id}
             className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
           >
             <div className="p-6">
-              {/* Top Section */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
                   <h3 className="text-lg font-bold text-gray-900 mb-1">
-                    {d.user_id.firstname} {d.user_id.lastname}
+                    {d.user_id?.firstname} {d.user_id?.lastname}
                   </h3>
                   <p className="text-sm text-gray-600 mb-2">
                     {d.vehicle_type} — {d.plate_number}
@@ -147,10 +195,22 @@ export default function DriverPresonManagement() {
                   </span>
                 </div>
                 <div className="flex space-x-2">
-                  <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                  <button
+                    onClick={() => {
+                      setSelectedDriver(d.id);
+                      setIsEditOpen(true);
+                    }}
+                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  >
                     <Edit className="w-4 h-4" />
                   </button>
-                  <button className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                  <button
+                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    onClick={() => {
+                      setSelectedDeleteId(d.id);
+                      setOpenDelete(true);
+                    }}
+                  >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
@@ -160,11 +220,11 @@ export default function DriverPresonManagement() {
               <div className="space-y-3 mb-4">
                 <div className="flex items-center text-sm text-gray-600">
                   <Phone className="w-4 h-4 mr-2" />
-                  {d.user_id.phone}
+                  {d.user_id?.phone}
                 </div>
                 <div className="flex items-center text-sm text-gray-600">
                   <Mail className="w-4 h-4 mr-2" />
-                  {d.user_id.email}
+                  {d.user_id?.email}
                 </div>
               </div>
             </div>
@@ -172,7 +232,36 @@ export default function DriverPresonManagement() {
         ))}
       </div>
 
-      {isAddOpen && <Loading name="Driver" />}
+      {/* ✅ Edit Modal */}
+      {isEditOpen && selectedDriver && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-xl shadow-lg p-6 max-w-2xl w-full relative">
+            <button
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+              onClick={() => setIsEditOpen(false)}
+            >
+              ✕
+            </button>
+            <UpdateDriverPage
+              driverId={selectedDriver}
+              setIsEditOpen={setIsEditOpen}
+              token={token}
+              fetchDrivers={fetchDrivers}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Delete Popup */}
+      {openDelete && selectedDeleteId && (
+        <DeletePopup
+          name="Driver"
+          id={selectedDeleteId}
+          onConfirm={handleDelete}
+          onCancel={() => setOpenDelete(false)}
+        />
+      )}
+
       {loading && <Loading name="Driver" />}
       {error && <p className="mt-4 text-red-500">{error}</p>}
     </div>
