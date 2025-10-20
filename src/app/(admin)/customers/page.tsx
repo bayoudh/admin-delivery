@@ -1,3 +1,4 @@
+import CustomerPage from '@/components/CustomerCMS/cmsCustomer'
 import type { Metadata } from 'next'
 
 
@@ -8,6 +9,6 @@ export const metadata: Metadata = {
 
 export default function DashboardPage() {
   return (
-    <div></div>
+    <CustomerPage/>
   )
 }
