@@ -4,18 +4,18 @@ export interface User {
   firstname: string;
   lastname: string;
   email: string;
-  phone:string;
+  phone: string;
   role: "customer" | "restaurant" | "driver";
 }
 export interface Category {
   id: string;
   name: string;
-  }
-  
+}
+
 export interface Restaurant {
   id: string;
   name: string;
-  category_id:Category;
+  category_id: Category;
   email?: string;
   phone?: string;
   street?: string;
@@ -24,11 +24,11 @@ export interface Restaurant {
   status: "active" | "closed";
   restaurant_photo?: string;
   created_at: Date;
-  user_id:User
+  user_id: User;
 }
 export interface driver {
-  id:string;
-   user_id:User;
+  id: string;
+  user_id: User;
   vehicle_type?: string;
   plate_number?: string;
   status: "available" | "on_delivery" | "offline";
@@ -37,21 +37,35 @@ export interface driver {
   driver_photo?: string;
 }
 
-export interface Delivery {
+export interface DeliveryOrder {
   id: string;
-  orderId: string;
-  restaurantId: string;
-  customerId: string;
-  driverId: string;
-  status: 'preparing' | 'picked_up' | 'in_transit' | 'delivered' | 'cancelled';
-  estimatedTime: number;
-  actualTime?: number;
-  distance: number;
-  fee: number;
-  createdAt: Date;
-  deliveredAt?: Date;
+  ref: string;
+  restaurant_id: Restaurant;
+  customer_id: User;
+  driver_id: driver;
+  total_price:number;
+  status: "pending" | "preparing" | "on_the_way" | "delivered" | "canceled";
+  payment_method: "cash" | "card";
+  delivery_street?: string;
+  delivery_city?: string;
+  delivery_zipcode?: string;
+  created_at: Date;
+  updated_at: Date;
 }
-
+export interface OrderItem  {
+  order_id: DeliveryOrder;
+  product_id:string;
+  quantity: number;
+  price: number;
+}
+export interface Product  {
+  restaurant_id:Restaurant;
+  name: string;
+  description?: string;
+  price: number;
+  available: boolean;
+  product_photo?: string;
+}
 export interface Customer {
   id: string;
   name: string;
@@ -62,7 +76,7 @@ export interface Customer {
   totalSpent: number;
   averageOrderValue: number;
   lastOrderDate: Date;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
   joinedAt: Date;
 }
 
@@ -99,5 +113,5 @@ export interface MenuItem {
   id: string;
   label: string;
   icon: LucideIcon;
-  url:string;
+  url: string;
 }
