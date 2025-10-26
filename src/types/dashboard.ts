@@ -53,8 +53,9 @@ export interface DeliveryOrder {
   updated_at: Date;
 }
 export interface OrderItem  {
+  id:string;
   order_id: DeliveryOrder;
-  product_id:string;
+  product_id:Product;
   quantity: number;
   price: number;
 }

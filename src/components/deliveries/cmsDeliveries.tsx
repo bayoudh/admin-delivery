@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { Search, Filter, Plus, Edit3, Trash2 } from "lucide-react";
+import { Search, Filter, Plus, Trash2, View } from "lucide-react";
 import { DeliveryOrder } from "@/types/dashboard";
 import Loading from "@/components/reaction/Loading";
 import { useAuthStore } from "@/lib/store/auth";
@@ -9,8 +9,7 @@ import DeletePopup from "@/components/reaction/DeletePopup";
 import { toast } from "react-toastify";
 import Pagination from "@/components/reaction/Pagination";
 import { useRouter } from "next/navigation";
-
-
+import ViewOrderPopup from "./viewOrederDelivery";
 
 export default function DeliveryOrdersManagement() {
   const [orderDeliverList, setOrderDeliverList] = useState<DeliveryOrder[]>([]);
@@ -22,14 +21,11 @@ export default function DeliveryOrdersManagement() {
   const [statusFilter, setStatusFilter] = useState<
     "all" | "pending" | "preparing" | "on_the_way" | "delivered" | "canceled"
   >("all");
-
+  const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
   const router = useRouter();
- /*  const [isEditOpen, setIsEditOpen] = useState(false); */
-  /* const [selectedOrderDeliver, setSelectedOrderDeliver] = useState<string | null>(null); */
-
   const [openDelete, setOpenDelete] = useState(false);
   const [selectedDeleteId, setSelectedDeleteId] = useState<string | null>(null);
-
   const token = useAuthStore.getState().token;
 
   // ✅ Fetch delivery orders
@@ -46,8 +42,6 @@ export default function DeliveryOrdersManagement() {
 
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data: DeliveryOrder[] = await res.json();
-
-      console.log(data)
       setOrderDeliverList(data);
     } catch (err) {
       console.error(err);
@@ -80,6 +74,39 @@ export default function DeliveryOrdersManagement() {
       toast.error("Error deleting order");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // ✅ Handle status change (PATCH)
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    try {
+      // Find the order
+      const order = orderDeliverList.find((o) => o.id === id);
+      if (!order) return toast.error("Order not found");
+
+      // Prevent changing canceled orders
+      if (order.status === "canceled") {
+        toast.warning("Cannot change status of a canceled order");
+        return;
+      }
+
+      // Send PATCH request
+      const res = await fetch(`/api/admin/orders/${id}/status`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!res.ok) throw new Error("Failed to update status");
+
+      toast.success(`Order status updated to "${newStatus}"`);
+      fetchOrderDelivers();
+    } catch (err) {
+      console.error(err);
+      toast.error("Error updating status");
     }
   };
 
@@ -130,9 +157,7 @@ export default function DeliveryOrdersManagement() {
     <div className="p-6 bg-white">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">
-          Manage Delivery Orders
-        </h1>
+        <h1 className="text-3xl font-bold text-gray-900">Manage Delivery Orders</h1>
         <button
           type="button"
           onClick={() => router.push("deliveries/addorderdelivery")}
@@ -160,9 +185,7 @@ export default function DeliveryOrdersManagement() {
             <Filter className="w-5 h-5 text-gray-400 mr-2" />
             <select
               value={statusFilter}
-              onChange={(e) =>
-                setStatusFilter(e.target.value as typeof statusFilter)
-              }
+              onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
               className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="all">All Status</option>
@@ -222,30 +245,39 @@ export default function DeliveryOrdersManagement() {
                 <td className="p-3 border-b">
                   {order.customer_id?.firstname} {order.customer_id?.lastname}
                 </td>
+                <td className="p-3 border-b">{order.total_price}</td>
+                <td className="p-3 border-b">{order.payment_method}</td>
+
+                {/* ✅ Editable Status Dropdown */}
                 <td className="p-3 border-b">
-                  {order.total_price}
-                </td>
-                 <td className="p-3 border-b">
-                  {order.payment_method}
-                </td>
-                <td className={`p-3 border-b`}>
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
-                      order.status
-                    )}`}
+               <select
+                    value={order.status}
+                    onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                    disabled={
+                      order.status === "delivered" || order.status === "canceled"
+                    }
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      order.status === "delivered" || order.status === "canceled"
+                        ? "opacity-60 cursor-not-allowed"
+                        : "cursor-pointer"
+                    } ${getStatusColor(order.status)}`}
                   >
-                    {order.status}
-                  </span>
+                    <option value="pending">Pending</option>
+                    <option value="preparing">Preparing</option>
+                    <option value="on_the_way">On The Way</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="canceled">Canceled</option>
+                  </select>
                 </td>
+
                 <td className="p-3 border-b text-center space-x-2">
-                  <button
-                    className="text-blue-600 hover:text-blue-800"
-                    onClick={() => {
-                     /*  setSelectedOrderDeliver(order.id); */
-                     /*  setIsEditOpen(true); */
-                    }}
-                  >
-                    <Edit3 size={18} />
+                  <button className="text-blue-600 hover:text-blue-800"
+                  onClick={() => {
+                setSelectedOrder(order.id);
+                setOpen(true);
+              }}
+              >
+                    <View size={18} />
                   </button>
                   <button
                     className="text-red-600 hover:text-red-800"
@@ -262,7 +294,7 @@ export default function DeliveryOrdersManagement() {
 
             {filteredOrderDelivers.length === 0 && (
               <tr>
-                <td colSpan={4} className="p-4 text-center text-gray-500 text-sm">
+                <td colSpan={8} className="p-4 text-center text-gray-500 text-sm">
                   No delivery orders found.
                 </td>
               </tr>
@@ -289,6 +321,11 @@ export default function DeliveryOrdersManagement() {
           onCancel={() => setOpenDelete(false)}
         />
       )}
+      <ViewOrderPopup
+        open={open}
+        onClose={() => setOpen(false)}
+        orderid={selectedOrder}
+      />
     </div>
   );
 }

@@ -167,8 +167,10 @@ export default function CreateOrderDeliveryPage() {
       setDeliveryZipcode("");
       setItems([{ product_id: "", quantity: 1, price: 0 }]);
       setProducts([]);
-    } catch (err) {
-      toast.error( "Error creating order");
+    } catch (error) {
+      console.error("Error fetching order:", error);
+
+      toast.error("Error creating order");
     } finally {
       setLoading(false);
     }
@@ -340,7 +342,7 @@ export default function CreateOrderDeliveryPage() {
         <div className="flex justify-between items-center pt-4 border-t">
           <span className="text-lg font-semibold">Total:</span>
           <span className="text-xl font-bold text-green-600">
-             {totalPrice.toFixed(2)} TND
+            {totalPrice.toFixed(2)} TND
           </span>
         </div>
 
