@@ -21,11 +21,11 @@ export default function DriverPresonManagement() {
   >("all");
   const [isAddOpen, setIsAddOpen] = useState(false);
 
-  // ✅ Edit modal states
+  // Edit modal states
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState<string | null>(null);
 
-  // ✅ Delete popup states
+  // Delete popup states
   const [openDelete, setOpenDelete] = useState(false);
   const [selectedDeleteId, setSelectedDeleteId] = useState<string | null>(null);
 
@@ -56,7 +56,7 @@ export default function DriverPresonManagement() {
     if (token) fetchDrivers();
   }, [token, fetchDrivers]);
 
-  // ✅ Handle delete driver
+  // ✅ Delete driver
   const handleDelete = async (id: string) => {
     try {
       setLoading(true);
@@ -80,6 +80,28 @@ export default function DriverPresonManagement() {
     }
   };
 
+  // ✅ Update driver status (PUT request)
+  const handleStatusChange = async (id: string, newStatus: "available" | "on_delivery" | "offline") => {
+    try {
+      const res = await fetch(`/api/admin/driver/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!res.ok) throw new Error("Failed to update status");
+
+      toast.success("Driver status updated");
+      fetchDrivers();
+    } catch (error) {
+      console.error(error);
+      toast.error("Error updating status");
+    }
+  };
+
   // ✅ Filter logic
   const filteredDrivers = driverList.filter((d) => {
     const matchesSearch = `${d.user_id?.firstname} ${d.user_id?.lastname} ${d.user_id?.phone} ${d.vehicle_type} ${d.plate_number} ${d.status}`
@@ -98,7 +120,7 @@ export default function DriverPresonManagement() {
         return "bg-yellow-100 text-yellow-800";
       case "offline":
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-red-100 text-red-800";
     }
   };
 
@@ -174,7 +196,7 @@ export default function DriverPresonManagement() {
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {filteredDrivers.map((d) => (
           <div
-            key={d.id || d.id}
+            key={d.id}
             className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
           >
             <div className="p-6">
@@ -186,14 +208,23 @@ export default function DriverPresonManagement() {
                   <p className="text-sm text-gray-600 mb-2">
                     {d.vehicle_type} — {d.plate_number}
                   </p>
-                  <span
-                    className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+
+                  {/* ✅ Editable Status Dropdown */}
+                  <select
+                    value={d.status}
+                    onChange={(e) =>
+                      handleStatusChange(d.id, e.target.value as "available" | "on_delivery" | "offline")
+                    }
+                    className={`mt-1 px-2 py-1 text-xs font-medium rounded-full border ${getStatusColor(
                       d.status
                     )}`}
                   >
-                    {d.status}
-                  </span>
+                    <option value="available">Available</option>
+                    <option value="on_delivery">On Delivery</option>
+                    <option value="offline">Offline</option>
+                  </select>
                 </div>
+
                 <div className="flex space-x-2">
                   <button
                     onClick={() => {
@@ -216,7 +247,6 @@ export default function DriverPresonManagement() {
                 </div>
               </div>
 
-              {/* Info Section */}
               <div className="space-y-3 mb-4">
                 <div className="flex items-center text-sm text-gray-600">
                   <Phone className="w-4 h-4 mr-2" />
@@ -232,7 +262,7 @@ export default function DriverPresonManagement() {
         ))}
       </div>
 
-      {/* ✅ Edit Modal */}
+      {/* Edit Modal */}
       {isEditOpen && selectedDriver && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
           <div className="bg-white rounded-xl shadow-lg p-6 max-w-2xl w-full relative">

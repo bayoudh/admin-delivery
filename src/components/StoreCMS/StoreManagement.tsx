@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
+import { toast } from "react-toastify";
 import {
   Search,
   Filter,
@@ -14,7 +15,7 @@ import {
 } from "lucide-react";
 import AddRestaurantPage from "./Addstore";
 import UpdateRestaurantPage from "./UpdateStore";
-import DeletePopup from "../reaction/DeletePopup"; // ✅ Make sure this path is correct
+import DeletePopup from "../reaction/DeletePopup";
 import Loading from "../reaction/Loading";
 import { useAuthStore } from "@/lib/store/auth";
 import { Restaurant } from "@/types/dashboard";
@@ -24,10 +25,11 @@ export default function RestaurantManagement() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "closed">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "closed">(
+    "all"
+  );
   const [isAddOpen, setIsAddOpen] = useState(false);
 
-  // ✅ For Edit and Delete
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selectedStore, setSelectedStore] = useState<string | null>(null);
   const [openDelete, setOpenDelete] = useState(false);
@@ -80,6 +82,34 @@ export default function RestaurantManagement() {
     }
   };
 
+  // ✅ Update status handler (PUT)
+  const handleStatusChange = async (id: string, newStatus: "active" | "closed") => {
+    try {
+      const res = await fetch(`/api/admin/restaurant/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!res.ok) throw new Error("Failed to update status");
+
+      // ✅ Update locally
+      setRestaurants((prev) =>
+        prev.map((r) =>
+          r.id === id ? { ...r, status: newStatus } : r
+        )
+      );
+      toast.success("Store status updated");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update store status");
+      setError("Failed to update store status");
+    }
+  };
+
   // ✅ Filtering
   const filteredRestaurants = restaurants.filter((r) => {
     const matchesSearch = `${r.name} ${r.city} ${r.phone} ${r.email}`
@@ -108,8 +138,12 @@ export default function RestaurantManagement() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Store Management</h1>
-          <p className="text-gray-600">Manage all registered stores and their performance.</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Store Management
+          </h1>
+          <p className="text-gray-600">
+            Manage all registered stores and their performance.
+          </p>
         </div>
         <button
           type="button"
@@ -121,7 +155,7 @@ export default function RestaurantManagement() {
         </button>
       </div>
 
-      {/* ✅ Add Modal */}
+      {/* Add Modal */}
       {isAddOpen && (
         <div className="fixed inset-0 z-30 bg-gray-600/50 flex justify-center items-center">
           <div className="relative bg-white rounded-xl shadow-lg p-6 max-w-2xl w-full">
@@ -157,7 +191,9 @@ export default function RestaurantManagement() {
             <Filter className="w-5 h-5 text-gray-400 mr-2" />
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
+              onChange={(e) =>
+                setStatusFilter(e.target.value as typeof statusFilter)
+              }
               className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="all">All Status</option>
@@ -168,7 +204,7 @@ export default function RestaurantManagement() {
         </div>
       </div>
 
-      {/* ✅ Restaurant Grid */}
+      {/* Restaurant Grid */}
       {loading ? (
         <Loading name="store" />
       ) : filteredRestaurants.length === 0 ? (
@@ -184,7 +220,9 @@ export default function RestaurantManagement() {
                 {/* Top Section */}
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h3 className="text-lg font-bold text-gray-900 mb-1">{restaurant.name}</h3>
+                    <h3 className="text-lg font-bold text-gray-900 mb-1">
+                      {restaurant.name}
+                    </h3>
                     <p className="text-sm text-gray-600 mb-2">
                       {restaurant.street && `${restaurant.street}, `}
                       {restaurant.city && `${restaurant.city}, `}
@@ -196,14 +234,25 @@ export default function RestaurantManagement() {
                         </span>
                       )}
                     </p>
-                    <span
-                      className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+
+                    {/* ✅ Status Dropdown (PUT Update) */}
+                    <select
+                      value={restaurant.status || "active"}
+                      onChange={(e) =>
+                        handleStatusChange(
+                          restaurant.id,
+                          e.target.value as "active" | "closed"
+                        )
+                      }
+                      className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(
                         restaurant.status || "active"
                       )}`}
                     >
-                      {restaurant.status || "Active"}
-                    </span>
+                      <option value="active">Active</option>
+                      <option value="closed">Closed</option>
+                    </select>
                   </div>
+
                   <div className="flex space-x-2">
                     <button
                       onClick={() => {
@@ -248,7 +297,8 @@ export default function RestaurantManagement() {
                       <div className="flex items-center">
                         <User2Icon className="w-4 h-4 mr-2 text-gray-500" />
                         <span>
-                          {restaurant.user_id.firstname} {restaurant.user_id.lastname}
+                          {restaurant.user_id.firstname}{" "}
+                          {restaurant.user_id.lastname}
                         </span>
                       </div>
                       <div className="flex items-center">
@@ -264,7 +314,7 @@ export default function RestaurantManagement() {
         </div>
       )}
 
-      {/* ✅ Edit Modal */}
+      {/* Edit Modal */}
       {isEditOpen && selectedStore && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
           <div className="bg-white rounded-xl shadow-lg p-6 max-w-2xl w-full relative">
@@ -284,7 +334,7 @@ export default function RestaurantManagement() {
         </div>
       )}
 
-      {/* ✅ Delete Popup */}
+      {/* Delete Popup */}
       {openDelete && selectedDeleteId && (
         <DeletePopup
           name="store"
