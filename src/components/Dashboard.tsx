@@ -24,7 +24,7 @@ export const Dashboard: React.FC = () => {
 
   const token = useAuthStore.getState().token;
 
-  // ✅ useCallback prevents the missing dependency warning
+  // ✅ Fetch Orders
   const fetchOrders = useCallback(async () => {
     if (!token) return;
     setLoading(true);
@@ -69,6 +69,7 @@ export const Dashboard: React.FC = () => {
   });
   const bestDriver = Object.entries(driverDeliveries).sort((a, b) => b[1] - a[1])[0];
 
+  // --- This week driver ---
   const now = new Date();
   const weekStart = new Date(now);
   weekStart.setDate(now.getDate() - now.getDay());
@@ -99,16 +100,23 @@ export const Dashboard: React.FC = () => {
     };
   });
 
-  // ✅ Strongly typed getMaxValue
-  const getMaxValue = (data: RevenueItem[], key: keyof Omit<RevenueItem, "month">): number => {
-    return Math.max(...data.map((item) => item[key] as number));
-  };
+  const getMaxValue = (
+    data: RevenueItem[],
+    key: keyof Omit<RevenueItem, "month">
+  ): number => Math.max(...data.map((item) => item[key] as number));
 
   // --- Export CSV ---
   const handleExport = () => {
     if (!orders.length) return;
 
-    const headers = ["Order Ref", "Customer", "Driver", "Total Price", "Status", "Created At"];
+    const headers = [
+      "Order Ref",
+      "Customer",
+      "Driver",
+      "Total Price",
+      "Status",
+      "Created At",
+    ];
     const rows = orders.map((o) => [
       o.ref,
       `${o.customer_id.firstname} ${o.customer_id.lastname}`,
@@ -134,17 +142,20 @@ export const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       {/* --- Header Controls --- */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
-        <div className="flex items-center space-x-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+          Analytics Dashboard
+        </h1>
+
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <select
             value={timeRange}
             onChange={(e) =>
               setTimeRange(e.target.value as "7d" | "30d" | "90d" | "1y")
             }
-            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="7d">Last 7 days</option>
             <option value="30d">Last 30 days</option>
@@ -157,7 +168,7 @@ export const Dashboard: React.FC = () => {
             onChange={(e) =>
               setSelectedMetric(e.target.value as "revenue" | "orders" | "customers")
             }
-            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="revenue">Revenue</option>
             <option value="orders">Orders</option>
@@ -166,10 +177,10 @@ export const Dashboard: React.FC = () => {
 
           <button
             onClick={handleExport}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center font-medium transition-colors"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center font-medium transition-colors text-sm"
           >
             <Download className="w-4 h-4 mr-2" />
-            Export Report
+            Export
           </button>
         </div>
       </div>
@@ -180,7 +191,7 @@ export const Dashboard: React.FC = () => {
       ) : (
         <>
           {/* KPIs */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-6 mb-8">
             <KPI title="Total Revenue" value={`$${totalRevenue.toFixed(2)}`} />
             <KPI title="Total Orders" value={totalOrders} />
             <KPI title="Delivered Orders" value={deliveredOrders} />
@@ -201,16 +212,21 @@ export const Dashboard: React.FC = () => {
           </div>
 
           {/* Revenue Trend Chart */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Revenue Trend</h2>
-            <div className="flex items-end space-x-2 h-64">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 overflow-x-auto">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
+              Revenue Trend
+            </h2>
+            <div className="flex items-end space-x-2 h-64 min-w-[700px] sm:min-w-0">
               {revenueData.map((data) => {
                 const value = data[selectedMetric];
                 const maxValue = getMaxValue(revenueData, selectedMetric);
                 const height = maxValue ? (value / maxValue) * 200 : 0;
 
                 return (
-                  <div key={data.month} className="flex flex-col items-center flex-1">
+                  <div
+                    key={data.month}
+                    className="flex flex-col items-center flex-1"
+                  >
                     <div className="w-full flex items-end justify-center mb-2">
                       <div
                         className="bg-blue-500 rounded-t-lg w-full transition-all duration-500 hover:bg-blue-600 cursor-pointer"
@@ -239,8 +255,10 @@ const KPI: React.FC<{ title: string; value: string | number }> = ({
   title,
   value,
 }) => (
-  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 text-center sm:text-left">
     <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
-    <p className="text-3xl font-bold text-gray-900">{value}</p>
+    <p className="text-2xl sm:text-3xl font-bold text-gray-900 break-words">
+      {value}
+    </p>
   </div>
 );
