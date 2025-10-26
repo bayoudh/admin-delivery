@@ -6,8 +6,6 @@ import axios from "axios";
 import { useAuthStore } from "@/lib/store/auth"; // adjust this path if needed
 import { DeliveryOrder, OrderItem } from "@/types/dashboard";
 
-
-
 interface Props {
   open: boolean;
   onClose: () => void;
@@ -19,41 +17,40 @@ export default function ViewOrderPopup({ open, onClose, orderid }: Props) {
   const [items, setItems] = useState<OrderItem[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const { token } = useAuthStore(); // get token from Zustand auth store
-useEffect(() => {
-  const fetchOrderDetails = async (id: string) => {
-    if (!token) {
-      console.warn("No auth token found!");
-      return;
+  const token = useAuthStore.getState().token; // get token from Zustand auth store
+  useEffect(() => {
+    const fetchOrderDetails = async (id: string) => {
+      if (!token) {
+        console.warn("No auth token found!");
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const res = await axios.get(`/api/admin/orders/${id}`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = res.data;
+        setOrder(data.order);
+        setItems(data.items || []);
+      } catch (error) {
+        console.error("Error fetching order:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (open && orderid) {
+      document.body.style.overflow = "hidden";
+      fetchOrderDetails(orderid);
+    } else {
+      document.body.style.overflow = "auto";
     }
-
-    try {
-      setLoading(true);
-      const res = await axios.get(`/api/admin/orders/${id}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = res.data;
-      setOrder(data.order);
-      setItems(data.items || []);
-    } catch (error) {
-      console.error("Error fetching order:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (open && orderid) {
-    document.body.style.overflow = "hidden";
-    fetchOrderDetails(orderid);
-  } else {
-    document.body.style.overflow = "auto";
-  }
-}, [open, orderid, token]);
-
+  }, [open, orderid, token]);
 
   if (!open || !orderid) return null;
 
@@ -76,11 +73,23 @@ useEffect(() => {
 
             {/* Order Info */}
             <div className="bg-gray-50 rounded-xl p-4 mb-5">
-              <p><strong>Order ID:</strong> {order.ref}</p>
-              <p><strong>Status:</strong> <span className="text-blue-600">{order.status}</span></p>
-              <p><strong>Payment:</strong> {order.payment_method}</p>
-              <p><strong>Total:</strong> {order.total_price.toFixed(2)} TND</p>
-              <p><strong>Created:</strong> {new Date(order.created_at).toLocaleString()}</p>
+              <p>
+                <strong>Order ID:</strong> {order.ref}
+              </p>
+              <p>
+                <strong>Status:</strong>{" "}
+                <span className="text-blue-600">{order.status}</span>
+              </p>
+              <p>
+                <strong>Payment:</strong> {order.payment_method}
+              </p>
+              <p>
+                <strong>Total:</strong> {order.total_price.toFixed(2)} TND
+              </p>
+              <p>
+                <strong>Created:</strong>{" "}
+                {new Date(order.created_at).toLocaleString()}
+              </p>
             </div>
 
             {/* Address */}
@@ -88,8 +97,9 @@ useEffect(() => {
               <div className="bg-gray-50 rounded-xl p-4 mb-5">
                 <h3 className="text-lg font-semibold mb-1">Shipping Address</h3>
                 <p>{order.delivery_street}</p>
-                <p>{order.delivery_city}, {order.delivery_zipcode}</p>
-                
+                <p>
+                  {order.delivery_city}, {order.delivery_zipcode}
+                </p>
               </div>
             )}
 
@@ -103,7 +113,6 @@ useEffect(() => {
                     className="flex items-center justify-between border-b pb-3"
                   >
                     <div className="flex items-center gap-3">
-                      
                       <div>
                         <p className="font-medium">{item.product_id.name}</p>
                         <p className="text-sm text-gray-500">

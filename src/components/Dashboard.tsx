@@ -1,113 +1,277 @@
-import React from 'react';
-/* import { StatCard } from './StatCard'; */
-//import { mockDashboardStats } from '../utils/mockData';
-/* import { DollarSign, Store, Truck, Users, TrendingUp, Clock, ShoppingBag, Star } from 'lucide-react'; */
+"use client";
+
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Download } from "lucide-react";
+import { useAuthStore } from "@/lib/store/auth";
+import { DeliveryOrder } from "@/types/dashboard";
+import Loading from "./reaction/Loading";
 
 export const Dashboard: React.FC = () => {
-  //const stats = mockDashboardStats;
+  const [orders, setOrders] = useState<DeliveryOrder[]>([]);
+  const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d" | "1y">(
+    "30d"
+  );
+  const [loading, setLoading] = useState(false);
+  const [selectedMetric, setSelectedMetric] = useState<
+    "revenue" | "orders" | "customers"
+  >("revenue");
 
+  const token = useAuthStore.getState().token;
+
+  useEffect(() => {
+    fetchOrders();
+  }, [timeRange]);
+
+  const fetchOrders = async () => {
+    if (!token) return;
+    setLoading(true);
+    try {
+      const res = await axios.get("/api/admin/orders", {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const fetchedOrders: DeliveryOrder[] = res.data.map((o: DeliveryOrder) => ({
+        ...o,
+        created_at: new Date(o.created_at),
+        updated_at: new Date(o.updated_at),
+      }));
+      setOrders(fetchedOrders);
+    } catch (err) {
+      console.error("Error fetching orders:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- KPIs ---
+  const totalRevenue = orders.reduce(
+    (acc, order) => acc + order.total_price,
+    0
+  );
+  const totalOrders = orders.length;
+  const deliveredOrders = orders.filter((o) => o.status === "delivered").length;
+  const uniqueCustomers = new Set(orders.map((o) => o.customer_id.id)).size;
+  const avgOrderValue = totalOrders ? totalRevenue / totalOrders : 0;
+
+  // --- Driver stats ---
+  const driverDeliveries: Record<string, number> = {};
+  orders.forEach((o) => {
+    if (o.driver_id && o.status === "delivered") {
+      const driverName = `${o.driver_id.user_id.firstname} ${o.driver_id.user_id.lastname}`;
+      driverDeliveries[driverName] = (driverDeliveries[driverName] || 0) + 1;
+    }
+  });
+  const bestDriver = Object.entries(driverDeliveries).sort(
+    (a, b) => b[1] - a[1]
+  )[0];
+
+  const now = new Date();
+  const weekStart = new Date(now);
+  weekStart.setDate(now.getDate() - now.getDay());
+  const weekOrders = orders.filter(
+    (o) => o.status === "delivered" && o.created_at >= weekStart
+  );
+  const driverDeliveriesThisWeek: Record<string, number> = {};
+  weekOrders.forEach((o) => {
+    if (o.driver_id) {
+      const driverName = `${o.driver_id.user_id.firstname} ${o.driver_id.user_id.lastname}`;
+      driverDeliveriesThisWeek[driverName] =
+        (driverDeliveriesThisWeek[driverName] || 0) + 1;
+    }
+  });
+  const bestDriverThisWeek = Object.entries(driverDeliveriesThisWeek).sort(
+    (a, b) => b[1] - a[1]
+  )[0];
+
+  // --- Revenue trend (by month) ---
+  const revenueData = Array.from({ length: 12 }, (_, i) => {
+    const monthOrders = orders.filter((o) => o.created_at.getMonth() === i);
+    return {
+      month: new Date(0, i).toLocaleString("default", { month: "short" }),
+      revenue: monthOrders.reduce((a, o) => a + o.total_price, 0),
+      orders: monthOrders.length,
+      customers: new Set(monthOrders.map((o) => o.customer_id.id)).size,
+    };
+  });
+
+  const getMaxValue = (data: any[], key: string) =>
+    Math.max(...data.map((item) => item[key]));
+  // Export function
+  const handleExport = () => {
+    if (!orders.length) return;
+
+    const headers = [
+      "Order Ref",
+      "Customer",
+      "Driver",
+      "Total Price",
+      "Status",
+      "Created At",
+    ];
+    const rows = orders.map((o) => [
+      o.ref,
+      `${o.customer_id.firstname} ${o.customer_id.lastname}`,
+      o.driver_id
+        ? `${o.driver_id.user_id.firstname} ${o.driver_id.user_id.lastname}`
+        : "N/A",
+      o.total_price,
+      o.status,
+      o.created_at.toLocaleString(),
+    ]);
+
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute(
+      "download",
+      `dashboard_orders_${new Date().toISOString()}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
   return (
     <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard Overview</h1>
-        <p className="text-gray-600">Welcome back! Here`&#39;`s what`&#39;`s happening with your business today.</p>
-      </div>
-
-      {/* Revenue Stats */}
-  {/*     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard
-          title="Total Revenue"
-          value={`$${stats.revenue.totalRevenue.toLocaleString()}`}
-          subtitle="All time"
-          icon={DollarSign}
-          trend={{ value: stats.revenue.revenueGrowth, isPositive: true }}
-          color="green"
-        />
-        <StatCard
-          title="Today's Revenue"
-          value={`$${stats.revenue.todayRevenue.toLocaleString()}`}
-          subtitle="Last 24 hours"
-          icon={TrendingUp}
-          color="blue"
-        />
-        <StatCard
-          title="Total Orders"
-          value={stats.revenue.orderCount.toLocaleString()}
-          subtitle="All time"
-          icon={ShoppingBag}
-          color="purple"
-        />
-        <StatCard
-          title="Average Order"
-          value={`$${stats.revenue.averageOrderValue}`}
-          subtitle="Per order"
-          icon={DollarSign}
-          color="amber"
-        />
-      </div>
- */}
-      {/* Business Stats */}
-     {/*  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <StatCard
-          title="Active Restaurants"
-          value={`${stats.restaurants.active}/${stats.restaurants.total}`}
-          subtitle="Currently operating"
-          icon={Store}
-          color="green"
-        />
-        <StatCard
-          title="Active Deliveries"
-          value={stats.deliveries.inProgress}
-          subtitle={`${stats.deliveries.completed} completed today`}
-          icon={Truck}
-          color="blue"
-        />
-        <StatCard
-          title="Active Customers"
-          value={stats.customers.active.toLocaleString()}
-          subtitle={`+${stats.customers.newThisMonth} this month`}
-          icon={Users}
-          color="purple"
-        />
-      </div> */}
-
-      {/* Top Performing Restaurants */}
-  {/*     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-gray-900">Top Performing Restaurants</h2>
-          <button className="text-blue-600 hover:text-blue-700 font-medium text-sm">View All</button>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">
+          Analytics Dashboard
+        </h1>
+        <div className="flex items-center space-x-4">
+          <select
+            value={timeRange}
+            onChange={(e) => setTimeRange(e.target.value as any)}
+            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="7d">Last 7 days</option>
+            <option value="30d">Last 30 days</option>
+            <option value="90d">Last 90 days</option>
+            <option value="1y">Last year</option>
+          </select>
+          <select
+            value={selectedMetric}
+            onChange={(e) => setSelectedMetric(e.target.value as any)}
+            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="revenue">Revenue</option>
+            <option value="orders">Orders</option>
+            <option value="customers">Customers</option>
+          </select>
+          <button
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center font-medium transition-colors"
+            onClick={handleExport}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Export Report
+          </button>
         </div>
-        
-        <div className="space-y-4">
-          {stats.restaurants.topPerforming.map((restaurant, index) => (
-            <div key={restaurant.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-              <div className="flex items-center">
-                <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm mr-4">
-                  {index + 1}
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900">{restaurant.name}</h3>
-                  <p className="text-sm text-gray-600">{restaurant.cuisine} • {restaurant.address}</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-6">
-                <div className="text-right">
-                  <p className="font-semibold text-gray-900">${restaurant.revenue.toLocaleString()}</p>
-                  <p className="text-sm text-gray-600">Revenue</p>
-                </div>
-                <div className="flex items-center">
-                  <Star className="w-4 h-4 text-yellow-400 mr-1" />
-                  <span className="font-medium text-gray-900">{restaurant.rating}</span>
-                </div>
-                <div className="flex items-center">
-                  <Clock className="w-4 h-4 text-gray-400 mr-1" />
-                  <span className="text-sm text-gray-600">{restaurant.deliveryTime}min</span>
-                </div>
-              </div>
+      </div>
+
+      {loading ? (
+        <Loading name="DATA" />
+      ) : (
+        <>
+          {/* KPIs */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <p className="text-sm font-medium text-gray-600 mb-1">
+                Total Revenue
+              </p>
+              <p className="text-3xl font-bold text-gray-900">
+                ${totalRevenue.toFixed(2)}
+              </p>
             </div>
-          ))}
-        </div>
-      </div> */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <p className="text-sm font-medium text-gray-600 mb-1">
+                Total Orders
+              </p>
+              <p className="text-3xl font-bold text-gray-900">{totalOrders}</p>
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <p className="text-sm font-medium text-gray-600 mb-1">
+                Delivered Orders
+              </p>
+              <p className="text-3xl font-bold text-gray-900">
+                {deliveredOrders}
+              </p>
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <p className="text-sm font-medium text-gray-600 mb-1">
+                Avg Order Value
+              </p>
+              <p className="text-3xl font-bold text-gray-900">
+                ${avgOrderValue.toFixed(2)}
+              </p>
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <p className="text-sm font-medium text-gray-600 mb-1">
+                Active Customers
+              </p>
+              <p className="text-3xl font-bold text-gray-900">
+                {uniqueCustomers}
+              </p>
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <p className="text-sm font-medium text-gray-600 mb-1">
+                Best Driver (Month)
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
+                {bestDriver ? `${bestDriver[0]} (${bestDriver[1]})` : "N/A"}
+              </p>
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <p className="text-sm font-medium text-gray-600 mb-1">
+                Best Driver (Week)
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
+                {bestDriverThisWeek
+                  ? `${bestDriverThisWeek[0]} (${bestDriverThisWeek[1]})`
+                  : "N/A"}
+              </p>
+            </div>
+          </div>
+
+          {/* Revenue Trend Chart */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
+              Revenue Trend
+            </h2>
+            <div className="flex items-end space-x-2 h-64">
+              {revenueData.map((data) => {
+                const value = data[selectedMetric];
+                const maxValue = getMaxValue(revenueData, selectedMetric);
+                const height = maxValue ? (value / maxValue) * 200 : 0;
+
+                return (
+                  <div
+                    key={data.month}
+                    className="flex flex-col items-center flex-1"
+                  >
+                    <div className="w-full flex items-end justify-center mb-2">
+                      <div
+                        className="bg-blue-500 rounded-t-lg w-full transition-all duration-500 hover:bg-blue-600 cursor-pointer"
+                        style={{ height: `${height}px` }}
+                        title={`${data.month}: ${
+                          selectedMetric === "revenue" ? "$" : ""
+                        }${value}`}
+                      />
+                    </div>
+                    <span className="text-xs text-gray-600 font-medium">
+                      {data.month}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
