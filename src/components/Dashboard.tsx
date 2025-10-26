@@ -192,10 +192,10 @@ export const Dashboard: React.FC = () => {
         <>
           {/* KPIs */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-6 mb-8">
-            <KPI title="Total Revenue" value={`$${totalRevenue.toFixed(2)}`} />
+            <KPI title="Total Revenue" value={`${totalRevenue.toFixed(2)} TND`} />
             <KPI title="Total Orders" value={totalOrders} />
             <KPI title="Delivered Orders" value={deliveredOrders} />
-            <KPI title="Avg Order Value" value={`$${avgOrderValue.toFixed(2)}`} />
+            <KPI title="Avg Order Value" value={`${avgOrderValue.toFixed(2)} TND`} />
             <KPI title="Active Customers" value={uniqueCustomers} />
             <KPI
               title="Best Driver (Month)"
@@ -232,7 +232,7 @@ export const Dashboard: React.FC = () => {
                         className="bg-blue-500 rounded-t-lg w-full transition-all duration-500 hover:bg-blue-600 cursor-pointer"
                         style={{ height: `${height}px` }}
                         title={`${data.month}: ${
-                          selectedMetric === "revenue" ? "$" : ""
+                          selectedMetric === "revenue" ? "TND" : ""
                         }${value}`}
                       />
                     </div>

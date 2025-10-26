@@ -116,7 +116,7 @@ export default function ViewOrderPopup({ open, onClose, orderid }: Props) {
                       <div>
                         <p className="font-medium">{item.product_id.name}</p>
                         <p className="text-sm text-gray-500">
-                          {item.quantity} × ${item.product_id.price.toFixed(2)}
+                          {item.quantity} × {item.product_id.price.toFixed(2)} TND
                         </p>
                       </div>
                     </div>
